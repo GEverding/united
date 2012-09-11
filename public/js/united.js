@@ -76,34 +76,51 @@ function placeOverlayAt(map, lat, lng, difficulty) {
 }
 
 function initialize() {
-    geocoder = new google.maps.Geocoder();
-    var map_options = {
-        center: new google.maps.LatLng(pin.lat, pin.long),
-        zoom: 10,
-        mapTypeId: google.maps.MapTypeId.ROADMAP
-    };
+  geocoder = new google.maps.Geocoder();
+  var map_options = {
+      center: new google.maps.LatLng(pin.lat, pin.long),
+      zoom: 10,
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+  };
 
-    var google_map = new google.maps.Map(document.getElementById("map_canvas"), map_options);
+  var google_map = new google.maps.Map(document.getElementById("map_canvas"), map_options);
 
-    placeOverlayAt(google_map, 43.47865, -80.54977);
+  placeOverlayAt(google_map, 43.47865, -80.54977);
 
-    var info_window = new google.maps.InfoWindow({
-        content: 'loading'
-    });
-/*    var m = new google.maps.Marker({
-        map: google_map,
-        animation: google.maps.Animation.DROP,
-        title: pin.title,
-        position: new google.maps.LatLng(pin.lat, pin.lng),
-        html: pin.msg
-    });
-    console.log(m)
-    google.maps.event.addListener(m, 'click', function() {
-        info_window.setContent(this.html);
-        info_window.open(google_map, this);
-    });
-    console.log("what is going on") */
+  var info_window = new google.maps.InfoWindow({
+      content: 'loading'
+  });
+  var pins = null;
+  $.ajax({
+    type: "GET",
+    url: "pins",
+    //headers: { "Accept-Encoding" : "gzip" },
+    success: function(data) {
+      console.log("Successfull get");
+      pins = JSON.parse(data);
+      console.log(pins);
 
+      for(i in pins.results){
+
+        var res = pins.results[i];
+        console.log(res);
+        var m = new google.maps.Marker({
+          map: google_map,
+          animation: google.maps.Animation.DROP,
+          title: res.Name,
+          position: new google.maps.LatLng(res.lat, res.long),
+          html: "<p><strong>"+ res.message +"</strong></p><footer><strong><i> - "+ res.name +"</i></strong></footer>"
+        });
+        console.log(m)
+        google.maps.event.addListener(m, 'click', function() {
+            info_window.setContent(this.html);
+            info_window.open(google_map, this);
+        });
+        console.log("what is going on")
+
+      }
+    }
+  });
 }
 
 function validate(){
@@ -166,6 +183,7 @@ function validate(){
       data: pin,
       success: function() {
         console.log("Successfull post");
+        $("#form").slideUp();
       }
     });
 
