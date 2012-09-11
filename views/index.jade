@@ -1,44 +1,39 @@
 h1= title
-p Enter your information here
+p Welcome To Monstercat United:)
 
 if err
   .alert= err
+script
+  $(document).ready(function(){
+    console.log("fired")
+    requestPosition()
+  })
 
 br
+#main(style="height: 1000px;")
+  #map_canvas
 
-form.form-horizontal(method="post", enctype="multipart/form-data")
-  fieldset
-    .control-group
-      label.control-label(for="name") Name
-      .controls
-        input#name.input-xlarge(type="text", name="name")
-    .control-group
-      label.control-label(for="email") Email
-      .controls
-        input#email.input-xlarge(type="text", name="email")
-    .control-group
-      label.control-label(for="upload") Photo
-      .controls
-        input.xlarge(type="file", name="upload", id="upload")
-        p.help-block.
-          Select the photo from your computer to upload.<br/>
+  #form(style="position: absolute; top: 150px; right: 0px;")
 
-          Please ensure the photos are high enough resolution so that they look
-          good in the video.
-    .control-group
-      label.control-label Agreement
-      .controls
-        blockquote(style="width: 400px")
-          | I consent and authorize Monstercat Media to use and publish the images I have submitted for Monstercat's Electronic Anniversary Campaign. I agree that Monstercat Media may use such photographs of me without my name for any lawful purposes such as publicity, advertising, and web content.
-          | Since anyone can download an image from the Internet, I agree that Monstercat Media is not responsible for unauthorized use of the images. I am aware that I am not entitled to any compensation.
-          | By signing and submitting my images I am stating that I am over the age of 18. Any submitters under the age of 18 must have a parent digitally sign this agreement.
-    .control-group
-      label.control-label(for="signature") Signature (Name again)
-      .controls
-        input#signatureName(type="text", name="signatureName")
-        label.checkbox I agree to the terms above and that I am 18 years or older (or have guardians signature)
-          input#signature.xlarge(type="checkbox", name="signature")
-        p.help-block 
-    fieldset.form-actions
-      input#uploadButton.btn.custom(type="submit", value="Submit")
+    form.form-horizontal(method="post", enctype="multipart/form-data")
+      fieldset
+        .control-group
+          label.control-label(for="name") Name
+          .controls
+            input#name(type="text", name="name")
+        .control-group
+          label.control-label(for="city") City&#47;Town
+          .controls
+            input#city(type="text", name="city")
+        .control-group
+          label.control-label(for="state") State&#47;Province
+          .controls
+            input#state(type="text", name"state")
+        .control-group
+          label.control-label(for="state") Note
+          .controls
+            textarea(rows="3")
+          p.help-block
+        fieldset.pull-right
+          input#uploadButton.btn.custom(type="submit", value="Submit")
 

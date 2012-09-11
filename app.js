@@ -38,6 +38,6 @@ mongoose.connect("mongodb://localhost/test", { auto_reconnect: true });
 app.get('/', routes.index);
 app.post('/', routes.index_submit);
 
-app.listen(6000, function(){
+app.listen(8080, function(){
   console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
 });
