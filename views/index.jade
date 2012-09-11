@@ -5,13 +5,12 @@ if err
   .alert= err
 script
   $(document).ready(function(){
-    console.log("fired")
-    requestPosition()
-  })
+      requestPosition();
+    });
 
 br
-#main(style="height: 1000px;")
-  #map_canvas
+#main
+  #map_canvas(style="height: 750px; width: 1000px")
 
   #form(style="position: absolute; top: 150px; right: 0px;")
 
@@ -28,12 +27,20 @@ br
         .control-group
           label.control-label(for="state") State&#47;Province
           .controls
-            input#state(type="text", name"state")
+            input#state(type="text", name="state")
         .control-group
-          label.control-label(for="state") Note
+          label.control-label(for="zip") Zipcode&#47;Postal Code
           .controls
-            textarea(rows="3")
-          p.help-block
-        fieldset.pull-right
-          input#uploadButton.btn.custom(type="submit", value="Submit")
+            input#zip(type="text", name="zip")
+        .control-group
+          label.control-label(for="state") Message
+          .controls
+            textarea#msg(rows="3")
+            span.help-block 140 Character Limit
+
+        input#lat(type="hidden", name="lat")
+        input#lng(type="hidden", name="lng")
+        fieldset.pull-right(style="padding-right: 50px;")
+          button#submit.btn.btn-small(type="button", onclick="validate()") Submit
+          button#cancel.btn.btn-small(type="button", onclick="cancel()") Cancel
 
