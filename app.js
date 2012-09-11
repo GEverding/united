@@ -15,9 +15,7 @@ var app = module.exports = express.createServer();
 app.configure(function(){
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
-  app.use(express.bodyParser({
-    uploadDir: path.join(__dirname, "uploads")
-  }));
+  app.use(express.bodyParser());
   app.use(express.methodOverride());
   app.use(app.router);
   app.use(express.static(__dirname + '/public'));
@@ -36,8 +34,9 @@ app.configure('production', function(){
 mongoose.connect("mongodb://localhost/test", { auto_reconnect: true });
 
 app.get('/', routes.index);
+app.get('/pins', routes.pins);
 app.post('/', routes.index_submit);
 
-app.listen(6000, function(){
+app.listen(8080, function(){
   console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
 });
