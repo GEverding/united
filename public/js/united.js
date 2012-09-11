@@ -1,12 +1,14 @@
-var t = [];
-var x = [];
-var y = [];
-var h = [];
 var nav = null;
+var geocoder = null;
 var pin = {
+    name: "",
+    city: "",
+    state: "",
+    zip: "",
+    message: "",
     lat: null,
-    lng: null
-}
+    long: null
+};
 
 function requestPosition() {
     if (nav == null) {
@@ -31,16 +33,17 @@ function requestPosition() {
 function successCallback(position) {
     console.log(position.coords.latitude + ', ' + position.coords.longitude);
     pin.lat = position.coords.latitude;
-    pin.lng = position.coords.longitude;
-
+    pin.long = position.coords.longitude;
+    $("#lat").val(pin.lat);
+    $("#lng").val(pin.long);
     initialize();
 
 }
 
 function initialize() {
-
+    geocoder = new google.maps.Geocoder();
     var map_options = {
-        center: new google.maps.LatLng(pin.lat, pin.lng),
+        center: new google.maps.LatLng(pin.lat, pin.long),
         zoom: 10,
         mapTypeId: google.maps.MapTypeId.ROADMAP
     };
@@ -50,9 +53,7 @@ function initialize() {
     var info_window = new google.maps.InfoWindow({
         content: 'loading'
     });
-    pin.title = "test"
-    pin.msg = "hello"
-    var m = new google.maps.Marker({
+/*    var m = new google.maps.Marker({
         map: google_map,
         animation: google.maps.Animation.DROP,
         title: pin.title,
@@ -64,10 +65,72 @@ function initialize() {
         info_window.setContent(this.html);
         info_window.open(google_map, this);
     });
-    console.log("what is going on")
-    var i = 0;
-    for (item in t) {
+    console.log("what is going on") */
 
-        i++;
+}
+
+function validate(){
+    console.log("Validate Fire");
+    var input = null;
+    var val = null;
+    var err;
+    input = $("#name")
+    if(input.val() === "" || input.val().length < 2){
+      input.closest('.control-group').addClass('error');
+      return false
     }
+    pin.name = input.val()
+
+    input = $("#state")
+    if(input.val() === "" || input.val().length < 2) {
+      input.closest('.control-group').addClass('error');
+      return false;
+    }
+    pin.state = input.val();
+
+
+    input = $("#city")
+    if(input.val() === "" || input.val().length < 2) {
+      input.closest('.control-group').addClass('error');
+      return false;
+    }
+    pin.city = input.val();
+
+    input = $("#zip")
+    if(input.val() === "" || input.val().length < 2){
+       input.closest('.control-group').addClass('error');
+       return false;
+    }
+    pin.zip = input.val();
+
+    input = $("#msg")
+    if(input.val() === "" || input.val().length <= 1 || input.val().length > 140){
+      input.closest('.control-group').addClass('error');
+      return false;
+    }
+    pin.message = input.val()
+
+    lat = $("#lat");
+    lng = $("#lng");
+    if(lat.val() === "" && lng.val() === "" ){
+      var address = $("#city").val() + ", " + $("#state").val() + ", " + $("#zip").val();
+      console.log(address);
+      geocoder.geocode({"address": address}, function(res, status){
+        if(status === google.maps.GeocoderStatus.OK){
+          console.log(res[0].geometry.location)
+          pin.lat = res[0].geometry.location.Xa;
+          pin.long = res[0].geometry.location.Ya;
+        }
+      });
+    }
+    $.ajax({
+      type: "POST",
+      url: "",
+      data: pin,
+      success: function() {
+        console.log("Successfull post");
+      }
+    });
+
+
 }
