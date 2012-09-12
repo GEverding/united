@@ -191,7 +191,7 @@ function validate(event){
 
       console.log(address);
       geocoder.geocode({"address": address}, function(res, status){
-        if(status === google.maps.GeocoderStatus.OK){)
+        if(status === google.maps.GeocoderStatus.OK){
           pin.lat = res[0].geometry.location.Xa;
           pin.long = res[0].geometry.location.Ya;
         }
