@@ -159,7 +159,7 @@ exports.index_submit = function(req, res){
       pin.save();
 
       res.cookie('unitedMarker', pin._id, {expires: null, path: '/'});
-      res.render('done', { title: title, err: null });
+      return res.json({});
     }
     else {
       res.status(500);
