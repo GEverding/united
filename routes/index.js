@@ -119,53 +119,51 @@ exports.claimed = function(req, res) {
 
 exports.index_submit = function(req, res){
   console.log(req.body);
-
   var data = {
     remoteip:  req.connection.remoteAddress,
     challenge: req.body.recaptcha_challenge_field,
     response:  req.body.recaptcha_response_field
   };
-  console.log(data);
   var recaptcha = new Recaptcha(PUBLIC_KEY, PRIVATE_KEY, data);
 
   recaptcha.verify(function(success, error_code) {
     if (success) {
-      console.log("success")
-      //res.send('Recaptcha response valid.');
+
+      var form = req.body;
+      var hasErr = false;
+      var err = null;
+
+      function check(cond, newErr){
+        hasErr = !cond || hasErr;
+        err = err || (!cond? newErr : null);
+      }
+
+      check(form.name !== "", "Name field must not be empty");
+      check(form.location !== "", "Location field must not be empty");
+      check(form.message !== "", "Message must not be empty");
+      check(!!form.lat, "Missing latitude");
+      check(!!form.long, "Missing longitude");
+
+      if (hasErr) {
+        res.status(500);
+        return res.json({err: err });
+      }
+
+      var pin = new Pin(form);
+      pin.save();
+
+      res.cookie('unitedMarker', pin._id, {expires: null, path: '/'})
+
+
+      res.render('done', { title: title, err: null });
     }
     else {
-      console.log("fail")
       res.status(500)
-      res.json({err: "Failed Recaptcha" })
-        // Redisplay the form.
+      return res.json({err: "Failed Captcha", msg: "", err_code: error_code })
 
     }
   });
 
-  var form = req.body;
-  var hasErr = false;
-  var err = null;
 
-  function check(cond, newErr){
-    hasErr = !cond || hasErr;
-    err = err || (!cond? newErr : null);
-  }
-
-  check(form.name !== "", "Name field must not be empty");
-  check(form.location !== "", "Location field must not be empty");
-  check(form.message !== "", "Message must not be empty");
-  check(!!form.lat, "Missing latitude");
-  check(!!form.long, "Missing longitude");
-
-  if (hasErr) {
-    res.status(500);
-    return res.json({err: err });
-  }
-
-  var pin = new Pin(form);
-  console.log(pin.toObject())
-  pin.save();
-
-  res.render('done', { title: title, err: null });
 
 };

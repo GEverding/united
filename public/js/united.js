@@ -19,7 +19,6 @@ function requestPosition(cb) {
     }
     if (nav != null) {
         var geoloc = nav.geolocation;
-        console.log(geoloc);
         if (geoloc != null) {
             geoloc.getCurrentPosition(function(position){
               successCallback(position, cb);
@@ -36,7 +35,6 @@ function requestPosition(cb) {
 
 function successCallback(position, cb) {
     if (position !== null) {
-      console.log(position.coords.latitude + ', ' + position.coords.longitude);
       pin.lat = position.coords.latitude;
       pin.long = position.coords.longitude;
     }
@@ -165,10 +163,12 @@ function initialize() {
     url: "pins",
     success: function(data) {
       pins = JSON.parse(data);
-      console.log("Pins: ", pins);
       for(var i = 0; i < pins.results.length; i++){
         var pin = pins.results[i];
-        console.log("Placing pin: ", pin)
+        var cookie = $.cookie("unitedMarker");
+        if( cookie === pin._id ){
+          map.panTo(new google.maps.LatLng(pin.lat, pin.long));
+        }
         placePin(pin, map, info_window);
       }
     }
@@ -223,7 +223,6 @@ function validate(event){
     if(lat.val() === "" && lng.val() === "" ){
       var address = $("#location").val();
 
-      console.log(address);
       geocoder.geocode({"address": address}, function(res, status){
         if(status === google.maps.GeocoderStatus.OK){
           pin.lat = res[0].geometry.location.Xa;
@@ -245,20 +244,18 @@ function validate(event){
       url: "",
       data: pin,
       success: function() {
-        console.log("Successfull POST");
         $("#form").slideUp();
-        //$(".alert").close();
         placePin(pin, event.data.map, event.data.info_window);
         event.data.map.panTo(new google.maps.LatLng(pin.lat, pin.long));
         Recaptcha.destroy()
       },
-      error: function() {
-        console.log("error");
-        // clear form? or just reload captcha?
+      error: function(fail) {
+        var ret = JSON.parse(fail.responseText);
+        Recaptcha.reload();
+        $("#form-err").show()
+        $("#form-err").append("<strong>Error!</strong> "+ ret.err)
       }
     });
-
-
 }
 
 //

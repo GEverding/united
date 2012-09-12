@@ -23,6 +23,11 @@ script
       });
 
       var map, info_window;
+
+      if( $.cookie('unitedMarker') !== null ){
+        $("#form").hide();
+      }
+
       requestPosition(function(obj){
         $("#submit").on("click", {
           map: obj.map,
@@ -43,7 +48,6 @@ script
               name_startsWith: query
             },
             success: function( data ) {
-              console.log(data.geonames);
               typeahead.process( $.map( data.geonames, function( item ) {
                 return {
                   label: item.name + (item.adminName1 ? ", " + item.adminName1 : "") + ", " + item.countryName,
@@ -61,10 +65,8 @@ script
           });
         },
         onselect: function(obj){
-          console.log(obj);
 
           $("#lat").val(obj.value.lat);
-          console.log($("#lat").val())
           pin.lat = obj.value.lat;
 
           $("#lng").val(obj.value.long);
@@ -117,6 +119,8 @@ br
   #map_canvas(style="height: 100%; width: 100%;")
 
   #form.rightform
+    .alert#form-err(style="display: none;")
+      button.close(type="button", data-dismiss="alert") x
 
     form.form-horizontal(method="", enctype="multipart/form-data")
       fieldset
@@ -124,12 +128,12 @@ br
           label.control-label(for="name") Name
             em *
           .controls
-            input#name(type="text", name="name")
+            input#name(type="text", name="name", placeholder="Enter Name...")
         .control-group
           label.control-label(for="location") Location
             em *
           .controls
-            input#location(type="text", name="location", autocomplete="off")
+            input#location(type="text", name="location", autocomplete="off", placeholder="Enter Your Location...")
         .control-group
           label.control-label(for="state") Message
             em *
