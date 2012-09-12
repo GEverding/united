@@ -9,7 +9,11 @@ if err
 
 script
   $(document).ready(function(){
-      requestPosition();
+      var map, info_window;
+      requestPosition(function(obj){
+          $("#submit").on("click", {map: obj.map, info_window: obj.info_window}, validate);
+        });
+
       $("#location").typeahead({
         property: "label",
         source: function(typeahead, query){
@@ -42,12 +46,14 @@ script
         },
         onselect: function(obj){
           console.log(obj);
-          if($("#lat").val() === ""){
-            $("#lat").val(obj.lat);
-          }
-          if($("#long").val() === ""){
-            $("#long").val(obj.long);
-          }
+
+          $("#lat").val(obj.value.lat);
+          console.log($("#lat").val())
+          pin.lat = obj.value.lat;
+
+          $("#lng").val(obj.value.long);
+          pin.long = obj.value.long;
+
         }
       });
     });
@@ -107,4 +113,4 @@ br
         input#lat(type="hidden", name="lat")
         input#lng(type="hidden", name="lng")
         fieldset.pull-right(style="padding-right: 50px;")
-          button#submit.btn.btn-small(type="button", onclick="validate()") Submit
+          button#submit.btn.btn-small(type="button") Submit

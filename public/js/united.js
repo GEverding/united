@@ -13,14 +13,16 @@ var pin = {
     long: null
 };
 
-function requestPosition() {
+function requestPosition(cb) {
     if (nav == null) {
         nav = window.navigator;
     }
     if (nav != null) {
         var geoloc = nav.geolocation;
         if (geoloc != null) {
-            geoloc.getCurrentPosition(successCallback);
+            geoloc.getCurrentPosition(function(position){
+              successCallback(position, cb);
+            });
         }
         else {
             console.log("geolocation not supported");
@@ -33,13 +35,13 @@ function requestPosition() {
 
 
 
-function successCallback(position) {
+function successCallback(position, cb) {
     console.log(position.coords.latitude + ', ' + position.coords.longitude);
     pin.lat = position.coords.latitude;
     pin.long = position.coords.longitude;
-    $("#lat").val(pin.lat);
-    $("#lng").val(pin.long);
-    initialize();
+    //$("#lat").val(pin.lat);
+    //$("#lng").val(pin.long);
+    cb(initialize());
 
 }
 
@@ -118,11 +120,23 @@ function placeOverlayAt(opts) {
 
 function initialize() {
   geocoder = new google.maps.Geocoder();
+  var lat, lng, zoom
+  if(pin.lat === null && pin.long === null){
+    lat = 80;
+    lng = 120;
+    zoom = 4;
+  }
+  else {
+    lat = pin.lat;
+    lng = pin.long;
+    zoom = 10;
+  }
   var map_options = {
-      center: new google.maps.LatLng(pin.lat, pin.long),
-      zoom: 10,
+      center: new google.maps.LatLng(lat, lng),
+      zoom: zoom,
       mapTypeId: google.maps.MapTypeId.ROADMAP
   };
+
 
   var map = new google.maps.Map(document.getElementById("map_canvas"), map_options);
 
@@ -142,34 +156,36 @@ function initialize() {
   $.ajax({
     type: "GET",
     url: "pins",
-    //headers: { "Accept-Encoding" : "gzip" },
     success: function(data) {
-      console.log("Successfull GET");
       pins = JSON.parse(data);
-      console.log(pins);
-
-      for(i in pins.results){
-
-        var res = pins.results[i];
-        var m = new google.maps.Marker({
-          map: map,
-          animation: google.maps.Animation.DROP,
-          title: res.Name,
-          position: new google.maps.LatLng(res.lat, res.long),
-          html: "<p><strong>"+ res.message +"</strong></p><br/><strong><i> - "+ res.name +"</i></strong></footer>"
-        });
-        console.log(m)
-        google.maps.event.addListener(m, 'click', function() {
-            info_window.setContent(this.html);
-            info_window.open(map, this);
-        });
-
+      console.log("Pins: ", pins);
+      for(var i = 0; i < pins.results.length; i++){
+        var pin = pins.results[i];
+        console.log("Placing pin: ", pin)
+        placePin(pin, map, info_window);
       }
     }
   });
+  return { map: map, info_window: info_window }
 }
 
-function validate(){
+function placePin(pin, map, info_window){
+  var m = new google.maps.Marker({
+    map: map,
+    animation: google.maps.Animation.DROP,
+    title: pin.name,
+    position: new google.maps.LatLng(pin.lat, pin.long),
+    html: "<p><strong>"+ pin.message +"</strong></p><br/><strong><i> - "+ pin.name +"</i></strong></footer>"
+  });
+  google.maps.event.addListener(m, 'click', (function(m) {
+    return function(){
+      info_window.setContent(m.html);
+      info_window.open(map, m);
+    }
+  })(m));
+}
+
+function validate(event){
     var input = null;
     var val = null;
     var err;
@@ -186,17 +202,7 @@ function validate(){
       input.closest('.control-group').addClass('error');
       return false;
     }
-    var substr = input.val().split(', ');
-    if(substr.length !== 3){
-      input.closest('.control-group').addClass('error');
-      $("#alert").show()
-      $("#alert").append('<strong>Invalid Location!</strong> Require: City, State/Province, Country');
-      return false
-
-    }
-    pin.city = substr[0] || ""
-    pin.state = substr[1] || ""
-    pin.country = substr[2] || ""
+    pin.location = input.val()
 
     input = $("#msg")
     if(input.val() === "" || input.val().length <= 1 || input.val().length > 140){
@@ -213,12 +219,17 @@ function validate(){
       console.log(address);
       geocoder.geocode({"address": address}, function(res, status){
         if(status === google.maps.GeocoderStatus.OK){
-          console.log(res[0].geometry.location)
           pin.lat = res[0].geometry.location.Xa;
           pin.long = res[0].geometry.location.Ya;
         }
+        else {
+          return false
+          // use html5 geo api
+        }
       });
     }
+    pin.lat = lat.val();
+    pin.long = lng.val();
     $.ajax({
       type: "POST",
       url: "",
@@ -226,7 +237,9 @@ function validate(){
       success: function() {
         console.log("Successfull POST");
         $("#form").slideUp();
-        $("#alert").close();
+        //$(".alert").close();
+        placePin(pin, event.data.map, event.data.info_window);
+        event.data.map.panTo(new google.maps.LatLng(pin.lat, pin.long));
       }
     });
 

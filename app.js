@@ -10,6 +10,7 @@ var express = require('express')
 
 var app = module.exports = express.createServer();
 
+
 // Configuration
 
 app.configure(function(){
@@ -29,8 +30,6 @@ app.configure('development', function(){
 app.configure('production', function(){
   app.use(express.errorHandler());
 });
-
-// Routes
 
 mongoose.connect("mongodb://localhost/test", { auto_reconnect: true });
 

@@ -9,7 +9,7 @@ var mongoose = require("mongoose");
 var path = require("path");
 var zlib = require("zlib");
 var fs = require('fs');
-var _ = require("underscore")
+var _ = require("underscore");
 var ArrayFormatter = require('../formatters').ArrayFormatter;
 
 var Schema   = mongoose.Schema;
@@ -71,7 +71,7 @@ exports.found = function(req, res){
 };
 
 exports.index_submit = function(req, res){
-  //console.log(req.body);
+  console.log(req.body);
 
   var form = req.body;
   var hasErr = false;
@@ -83,9 +83,7 @@ exports.index_submit = function(req, res){
   }
 
   check(form.name !== "", "Name field must not be empty");
-  check(form.city !== "", "City field must not be empty");
-  check(form.state !== "", "Province/State field must not be empty");
-  check(form.zip !== "", "Zipcode/Postal Code field must not be empty");
+  check(form.location !== "", "Location field must not be empty");
   check(form.message !== "", "Message must not be empty");
   check(!!form.lat, "Missing latitude");
   check(!!form.long, "Missing longitude");
@@ -97,8 +95,8 @@ exports.index_submit = function(req, res){
 
   var pin = new Pin(form);
   console.log(pin.toObject())
-  console.log("im here");
   pin.save();
 
   res.render('done', { title: title, err: null });
+
 };
