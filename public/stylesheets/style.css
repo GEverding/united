@@ -10,6 +10,10 @@ a {
   color: #00B7FF;
 }
 
+#catlogo {
+  padding-left: 10px;
+}
+
 #map_canvas {
   position: absolute;
   top: 0px;
@@ -26,6 +30,10 @@ a {
   overflow: auto;
   width: 310px;
   padding: 10px;
+}
+
+.claims {
+  padding: 15px;
 }
 
 #header {

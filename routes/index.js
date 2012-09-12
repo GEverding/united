@@ -54,9 +54,38 @@ exports.pins = function(req, res){
 };
 
 exports.index = function(req, res){
-  res.render('index', {
-    title: title,
-    err: null
+  Egg.find({}, function(err, eggs){
+    function anyId(id){
+      return _(eggs).any(function(egg){
+        return egg.eggId === id;
+      });
+    }
+
+    function getName(id){
+      var maybeEgg = _(eggs).find(function(egg){
+        return egg.eggId === id;
+      });
+
+      return !maybeEgg ? '' : maybeEgg.name;
+    }
+
+    var eggIds = ['a', 'b', 'c', 'd', 'e'];
+
+    var cats = _(eggIds).map(function(eggId){
+      var d = {};
+      d = _.extend(d, {
+        found: anyId(eggId),
+        name: getName(eggId),
+        eggId: eggId
+      });
+      return d;
+    });
+
+    res.render('index', {
+      title: title,
+      err: null,
+      cats: cats
+    });
   });
 };
 

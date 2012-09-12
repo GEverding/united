@@ -1,10 +1,27 @@
 #header
-  img(src="/img/graphic1.png")
+  img#catlogo.pull-left(src="/img/graphic1.png")
+  .claims.pull-left
+    each cat in cats
+      if cat.found
+        img.found(src="/img/monstercat_found.png", data-foundid=cat.eggId,
+          data-foundby=cat.name)
+      else
+        img(src="/img/monstercat_missing.png")
   .pull-right
     img(src="/img/graphic2.png", width="95%", height="95%")
 
 script
   $(document).ready(function(){
+      $(".found").popover({
+        placement: 'bottom',
+        selector: true,
+        trigger: 'hover',
+        title: "Found!",
+        content: function(){
+          return "by: " + $(this).data("foundby");
+        }
+      });
+
       var map, info_window;
       requestPosition(function(obj){
         $("#submit").on("click", {
@@ -81,6 +98,7 @@ br
         | can contact you for your info.
 
     form.form-horizontal
+      input#modalEggId(type="hidden", value="")
       fieldset
         .control-group
           label.control-label(for="contestName") Name

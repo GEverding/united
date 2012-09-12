@@ -84,10 +84,13 @@ function placeOverlayAt(opts) {
   on('added_cat', function(div){
     $(div).click(function(){
       $modal.modal();
+      $("#modalEggId", $modal).val(opts.eggId);
     });
   });
 
   $(".submit-cat", $modal).click(function(){
+    if ($("#modalEggId", $modal).val() !== opts.eggId)
+      return;
     var name = $("#contestName", $modal).val();
     var email = $("#email", $modal).val();
 
@@ -137,7 +140,8 @@ function initialize() {
   var map = new google.maps.Map(document.getElementById("map_canvas"), map_options);
 
   var overlays = [
-    { map: map, lat: 43.47865, lng: -80.54977, eggId: 'a', difficulty: 10 }
+    { map: map, lat: 43.47865, lng: -80.54977, eggId: 'a', difficulty: 10 },
+    { map: map, lat: 35.66052, lng: -106.06499, eggId: 'b', difficulty: 9 }
   ];
 
   $.ajax({
