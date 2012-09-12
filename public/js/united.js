@@ -149,7 +149,7 @@ function initialize() {
     url: "/found",
     success: function(claimed){
       var nonClaimedOverlays = _(overlays).filter(function(overlay){
-        return _(claimed).include(overlay.eggId);
+        return !_(claimed).include(overlay.eggId);
       });
       _(nonClaimedOverlays).each(placeOverlayAt);
     }
