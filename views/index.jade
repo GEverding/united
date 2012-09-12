@@ -9,7 +9,11 @@ if err
 
 script
   $(document).ready(function(){
-      requestPosition();
+      var map, info_window;
+      requestPosition(function(obj){
+          $("#submit").on("click", {map: obj.map, info_window: obj.info_window}, validate);
+        });
+
       $("#location").typeahead({
         property: "label",
         source: function(typeahead, query){
@@ -43,11 +47,12 @@ script
         onselect: function(obj){
           console.log(obj);
 
-          $("#lat").val(obj.lat);
-          pin.lat = obj.lat;
+          $("#lat").val(obj.value.lat);
+          console.log($("#lat").val())
+          pin.lat = obj.value.lat;
 
-          $("#long").val(obj.long);
-          pin.long = obj.lng;
+          $("#lng").val(obj.value.long);
+          pin.long = obj.value.long;
 
         }
       });
@@ -55,6 +60,18 @@ script
 
 
 br
+
+#catModal.modal.hide.fade(role="dialog", aria-labelledby="myModalLable")
+  .modal-header
+    button.close(type="button", data-dismiss="modal", aria-hidden="true")
+      | &times;
+    h3 You found a hidden Monstercat!
+    .modal-body
+      p Awesome
+    .modal-footer
+      a.btn(href="#", data-dismiss="modal") Close
+      a.btn.btn-primary(href="#") Submit
+
 #main
   #map_canvas(style="height: 750px; width: 100%;")
 
@@ -82,4 +99,4 @@ br
         input#lat(type="hidden", name="lat")
         input#lng(type="hidden", name="lng")
         fieldset.pull-right(style="padding-right: 50px;")
-          button#submit.btn.btn-small(type="button", onclick="validate()") Submit
+          button#submit.btn.btn-small(type="button") Submit

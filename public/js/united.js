@@ -3,8 +3,6 @@ var united = united || {};
 
 var nav = null;
 var geocoder = null;
-var google_map = null;
-var info_window = null;
 var pin = {
     name: "",
     city: "",
@@ -15,14 +13,16 @@ var pin = {
     long: null
 };
 
-function requestPosition() {
+function requestPosition(cb) {
     if (nav == null) {
         nav = window.navigator;
     }
     if (nav != null) {
         var geoloc = nav.geolocation;
         if (geoloc != null) {
-            geoloc.getCurrentPosition(successCallback);
+            geoloc.getCurrentPosition(function(position){
+              successCallback(position, cb);
+            });
         }
         else {
             console.log("geolocation not supported");
@@ -35,17 +35,23 @@ function requestPosition() {
 
 
 
-function successCallback(position) {
+function successCallback(position, cb) {
     console.log(position.coords.latitude + ', ' + position.coords.longitude);
     pin.lat = position.coords.latitude;
     pin.long = position.coords.longitude;
     //$("#lat").val(pin.lat);
     //$("#lng").val(pin.long);
-    initialize();
+    cb(initialize());
 
 }
 
-function placeOverlayAt(map, lat, lng, difficulty) {
+function placeOverlayAt(opts) {
+  var map = opts.map;
+  var lat = opts.lat;
+  var lng = opts.lng;
+  var pinId = opts.pinId;
+  var difficulty = opts.difficulty || 11;
+
   var hw = 0.004;
   var hh = 0.0031;
   var swBound = new google.maps.LatLng(lat - hw, lng - hh);
@@ -61,7 +67,7 @@ function placeOverlayAt(map, lat, lng, difficulty) {
 
   function shouldShow() {
     var zoom = map.getZoom();
-    return bounds.intersects(map.getBounds());
+    return zoom > 9 && bounds.intersects(map.getBounds());
   }
 
   function showOrHide() {
@@ -73,8 +79,16 @@ function placeOverlayAt(map, lat, lng, difficulty) {
     }
   }
 
+  var $modal = $("#catModal");
+
   on('zoom_changed', showOrHide);
   on('center_changed', showOrHide);
+  on('added_cat', function(div){
+    $(div).click(function(){
+      console.log($modal);
+      $modal.modal();
+    });
+  });
 }
 
 function initialize() {
@@ -96,13 +110,21 @@ function initialize() {
       mapTypeId: google.maps.MapTypeId.ROADMAP
   };
 
-  google_map = new google.maps.Map(document.getElementById("map_canvas"), map_options);
 
-  placeOverlayAt(google_map, 43.47865, -80.54977);
+  var map = new google.maps.Map(document.getElementById("map_canvas"), map_options);
 
-  info_window = new google.maps.InfoWindow({
+  placeOverlayAt({
+    map: map,
+    lat: 43.47865,
+    lng: -80.54977,
+    pinId: 'a',
+    difficulty: 10
+  });
+
+  var info_window = new google.maps.InfoWindow({
       content: 'loading'
   });
+
   var pins = null;
   $.ajax({
     type: "GET",
@@ -111,34 +133,32 @@ function initialize() {
       pins = JSON.parse(data);
       console.log("Pins: ", pins);
       for(var i = 0; i < pins.results.length; i++){
-
         var pin = pins.results[i];
         console.log("Placing pin: ", pin)
-        placePin(pin);
-
+        placePin(pin, map, info_window);
       }
     }
   });
+  return { map: map, info_window: info_window }
 }
 
-function placePin(pin){
+function placePin(pin, map, info_window){
   var m = new google.maps.Marker({
-    map: google_map,
+    map: map,
     animation: google.maps.Animation.DROP,
     title: pin.name,
     position: new google.maps.LatLng(pin.lat, pin.long),
     html: "<p><strong>"+ pin.message +"</strong></p><br/><strong><i> - "+ pin.name +"</i></strong></footer>"
   });
-  console.log(m)
   google.maps.event.addListener(m, 'click', (function(m) {
     return function(){
       info_window.setContent(m.html);
-      info_window.open(google_map, m);
+      info_window.open(map, m);
     }
   })(m));
 }
 
-function validate(){
+function validate(event){
     var input = null;
     var val = null;
     var err;
@@ -155,17 +175,7 @@ function validate(){
       input.closest('.control-group').addClass('error');
       return false;
     }
-    var substr = input.val().split(', ');
-    if(substr.length !== 3){
-      input.closest('.control-group').addClass('error');
-      $("#error").show()
-      $("#error").append('<strong>Invalid Location!</strong> Require: City, State/Province, Country');
-      return false
-
-    }
-    pin.city = substr[0] || ""
-    pin.state = substr[1] || ""
-    pin.country = substr[2] || ""
+    pin.location = input.val()
 
     input = $("#msg")
     if(input.val() === "" || input.val().length <= 1 || input.val().length > 140){
@@ -181,8 +191,7 @@ function validate(){
 
       console.log(address);
       geocoder.geocode({"address": address}, function(res, status){
-        if(status === google.maps.GeocoderStatus.OK){
-          console.log(res[0].geometry.location)
+        if(status === google.maps.GeocoderStatus.OK){)
           pin.lat = res[0].geometry.location.Xa;
           pin.long = res[0].geometry.location.Ya;
         }
@@ -192,6 +201,8 @@ function validate(){
         }
       });
     }
+    pin.lat = lat.val();
+    pin.long = lng.val();
     $.ajax({
       type: "POST",
       url: "",
@@ -200,8 +211,8 @@ function validate(){
         console.log("Successfull POST");
         $("#form").slideUp();
         //$(".alert").close();
-        placePin(pin);
-        google_map.panTo(new google.maps.LatLng(pin.lat, pin.long));
+        placePin(pin, event.data.map, event.data.info_window);
+        event.data.map.panTo(new google.maps.LatLng(pin.lat, pin.long));
       }
     });
 
@@ -241,9 +252,11 @@ MOverlay.prototype.onAdd = function() {
 
   // Create the DIV and set some basic attributes.
   var div = document.createElement('div');
+  var $div = $(div);
   div.style.border = 'none';
   div.style.borderWidth = '0px';
   div.style.position = 'absolute';
+  div.style.cursor = 'pointer';
 
   // Create an IMG element and attach it to the DIV.
   var img = document.createElement('img');
@@ -259,6 +272,8 @@ MOverlay.prototype.onAdd = function() {
   // We'll add this overlay to the overlayImage pane.
   var panes = this.getPanes();
   panes.overlayImage.appendChild(this.div_);
+
+  google.maps.event.trigger(this.map_, 'added_cat', div);
 }
 
 function sigmoid(t) {
@@ -267,6 +282,7 @@ function sigmoid(t) {
 }
 
 MOverlay.prototype.draw = function() {
+  if (!this.div_) return;
   // Size and position the overlay. We use a southwest and northeast
   // position of the overlay to peg it to the correct position and size.
   // We need to retrieve the projection from this overlay to do this.
@@ -292,20 +308,29 @@ MOverlay.prototype.draw = function() {
 }
 
 
+MOverlay.prototype.remove = function() {
+  if (this.div_ && this.div_.parentNode) {
+    this.div_.parentNode.removeChild(this.div_);
+    this.div_ = null;
+  }
+}
+
 MOverlay.prototype.onRemove = function() {
-  this.div_.parentNode.removeChild(this.div_);
+  this.remove();
 }
 
 // Note that the visibility property must be a string enclosed in quotes
 MOverlay.prototype.hide = function() {
   if (this.div_) {
-    $(this.div_).fadeOut();
+    this.onRemove();
   }
 }
 
 MOverlay.prototype.show = function() {
-  if (this.div_) {
-    $(this.div_).fadeIn();
+  if (!this.div_) {
+    console.log("adding..");
+    this.onAdd();
+    this.draw();
   }
 }
 
