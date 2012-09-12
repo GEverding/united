@@ -43,7 +43,13 @@ function successCallback(position) {
 
 }
 
-function placeOverlayAt(map, lat, lng, difficulty) {
+function placeOverlayAt(opts) {
+  var map = opts.map;
+  var lat = opts.lat;
+  var lng = opts.lng;
+  var pinId = opts.pinId;
+  var difficulty = opts.difficulty || 11;
+
   var hw = 0.004;
   var hh = 0.0031;
   var swBound = new google.maps.LatLng(lat - hw, lng - hh);
@@ -59,7 +65,7 @@ function placeOverlayAt(map, lat, lng, difficulty) {
 
   function shouldShow() {
     var zoom = map.getZoom();
-    return bounds.intersects(map.getBounds());
+    return zoom > 9 && bounds.intersects(map.getBounds());
   }
 
   function showOrHide() {
@@ -71,8 +77,16 @@ function placeOverlayAt(map, lat, lng, difficulty) {
     }
   }
 
+  var $modal = $("#catModal");
+
   on('zoom_changed', showOrHide);
   on('center_changed', showOrHide);
+  on('added_cat', function(div){
+    $(div).click(function(){
+      console.log($modal);
+      $modal.modal();
+    });
+  });
 }
 
 function initialize() {
@@ -83,13 +97,20 @@ function initialize() {
       mapTypeId: google.maps.MapTypeId.ROADMAP
   };
 
-  var google_map = new google.maps.Map(document.getElementById("map_canvas"), map_options);
+  var map = new google.maps.Map(document.getElementById("map_canvas"), map_options);
 
-  placeOverlayAt(google_map, 43.47865, -80.54977);
+  placeOverlayAt({
+    map: map,
+    lat: 43.47865,
+    lng: -80.54977,
+    pinId: 'a',
+    difficulty: 10
+  });
 
   var info_window = new google.maps.InfoWindow({
       content: 'loading'
   });
+
   var pins = null;
   $.ajax({
     type: "GET",
@@ -104,7 +125,7 @@ function initialize() {
 
         var res = pins.results[i];
         var m = new google.maps.Marker({
-          map: google_map,
+          map: map,
           animation: google.maps.Animation.DROP,
           title: res.Name,
           position: new google.maps.LatLng(res.lat, res.long),
@@ -113,7 +134,7 @@ function initialize() {
         console.log(m)
         google.maps.event.addListener(m, 'click', function() {
             info_window.setContent(this.html);
-            info_window.open(google_map, this);
+            info_window.open(map, this);
         });
 
       }
@@ -218,9 +239,11 @@ MOverlay.prototype.onAdd = function() {
 
   // Create the DIV and set some basic attributes.
   var div = document.createElement('div');
+  var $div = $(div);
   div.style.border = 'none';
   div.style.borderWidth = '0px';
   div.style.position = 'absolute';
+  div.style.cursor = 'pointer';
 
   // Create an IMG element and attach it to the DIV.
   var img = document.createElement('img');
@@ -236,6 +259,8 @@ MOverlay.prototype.onAdd = function() {
   // We'll add this overlay to the overlayImage pane.
   var panes = this.getPanes();
   panes.overlayImage.appendChild(this.div_);
+
+  google.maps.event.trigger(this.map_, 'added_cat', div);
 }
 
 function sigmoid(t) {
@@ -244,6 +269,7 @@ function sigmoid(t) {
 }
 
 MOverlay.prototype.draw = function() {
+  if (!this.div_) return;
   // Size and position the overlay. We use a southwest and northeast
   // position of the overlay to peg it to the correct position and size.
   // We need to retrieve the projection from this overlay to do this.
@@ -269,20 +295,29 @@ MOverlay.prototype.draw = function() {
 }
 
 
+MOverlay.prototype.remove = function() {
+  if (this.div_ && this.div_.parentNode) {
+    this.div_.parentNode.removeChild(this.div_);
+    this.div_ = null;
+  }
+}
+
 MOverlay.prototype.onRemove = function() {
-  this.div_.parentNode.removeChild(this.div_);
+  this.remove();
 }
 
 // Note that the visibility property must be a string enclosed in quotes
 MOverlay.prototype.hide = function() {
   if (this.div_) {
-    $(this.div_).fadeOut();
+    this.onRemove();
   }
 }
 
 MOverlay.prototype.show = function() {
-  if (this.div_) {
-    $(this.div_).fadeIn();
+  if (!this.div_) {
+    console.log("adding..");
+    this.onAdd();
+    this.draw();
   }
 }
 

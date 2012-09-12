@@ -54,6 +54,18 @@ script
 
 
 br
+
+#catModal.modal.hide.fade(role="dialog", aria-labelledby="myModalLable")
+  .modal-header
+    button.close(type="button", data-dismiss="modal", aria-hidden="true")
+      | &times;
+    h3 You found a hidden Monstercat!
+    .modal-body 
+      p Awesome
+    .modal-footer
+      a.btn(href="#", data-dismiss="modal") Close
+      a.btn.btn-primary(href="#") Submit
+
 #main
   #map_canvas(style="height: 750px; width: 100%;")
 
