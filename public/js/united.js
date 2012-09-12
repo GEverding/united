@@ -42,20 +42,22 @@ function successCallback(position, cb) {
 }
 
 function placeOverlayAt(opts) {
+  console.log("Adding " + opts.eggId);
   var map = opts.map;
   var lat = opts.lat;
   var lng = opts.lng;
   var eggId = opts.eggId;
+  var scale = opts.scale || 1;
   var difficulty = opts.difficulty || 11;
 
-  var hw = 0.004;
-  var hh = 0.0031;
+  var hw = 0.004 * scale;
+  var hh = 0.0031 * scale;
   var swBound = new google.maps.LatLng(lat - hw, lng - hh);
   var neBound = new google.maps.LatLng(lat + hw, lng + hh);
   var bounds = new google.maps.LatLngBounds(swBound, neBound);
 
   var srcImage = '/img/monstercat_findme.png';
-  overlay = new MOverlay(bounds, srcImage, map, difficulty);
+  overlay = new MOverlay(bounds, srcImage, map, difficulty, opts);
 
   function on(evt, cb) {
     google.maps.event.addListener(map, evt, cb);
@@ -63,7 +65,7 @@ function placeOverlayAt(opts) {
 
   function shouldShow() {
     var zoom = map.getZoom();
-    return zoom > 9 && bounds.intersects(map.getBounds());
+    return zoom > 8 && bounds.intersects(map.getBounds());
   }
 
   function showOrHide() {
@@ -77,12 +79,14 @@ function placeOverlayAt(opts) {
 
   var $modal = $("#catModal");
 
+
   on('zoom_changed', showOrHide);
   on('center_changed', showOrHide);
-  on('added_cat', function(div){
+  on('added_cat', function(div, opts_){
     $(div).click(function(){
       $modal.modal();
-      $("#modalEggId", $modal).val(opts.eggId);
+      $("#modalEggId", $modal).val(opts_.eggId);
+      $("#modalMsg",   $modal).text(opts_.message || "");
     });
   });
 
@@ -138,8 +142,22 @@ function initialize() {
   var map = new google.maps.Map(document.getElementById("map_canvas"), map_options);
 
   var overlays = [
-    { map: map, lat: 43.47865, lng: -80.54977, eggId: 'a', difficulty: 10 },
-    { map: map, lat: 35.66052, lng: -106.06499, eggId: 'b', difficulty: 9 }
+    { map: map, lat: 29.975309, lng: 31.137751, eggId: 'a', difficulty: 10,
+      message: "The original Monstercat."
+    },
+    { map: map, lat: 61.502224, lng: 23.71985, eggId: 'b', difficulty: 9,
+      message: "Oldest operational Sauna in Finland!"
+    },
+    { map: map, lat: 35.50936, lng: -105.918694, eggId: 'c', difficulty: 9,
+      message: ""
+    },
+    { map: map, lat: 27.9856, lng: 86.9233, eggId: 'd', difficulty: 10,
+      message: "#OperationDethrone"
+    },
+    { map: map, lat: -19.39, lng: 46.64, eggId: 'e', difficulty: 9,
+      message: "You have found the secret Monstercat. SHUT. DOWN. EVERYTHING.",
+      scale: 8
+    }
   ];
 
   $.ajax({
@@ -262,10 +280,12 @@ function validate(event){
 //
 // MOverlay
 //
-function MOverlay(bounds, image, map, difficulty) {
+function MOverlay(bounds, image, map, difficulty, opts) {
 
   this.ratio = 160 / 212;
   this.difficulty = difficulty || 11;
+
+  this.opts = opts;
 
   // Now initialize all properties.
   this.bounds_ = bounds;
@@ -313,7 +333,7 @@ MOverlay.prototype.onAdd = function() {
   var panes = this.getPanes();
   panes.overlayImage.appendChild(this.div_);
 
-  google.maps.event.trigger(this.map_, 'added_cat', div);
+  google.maps.event.trigger(this.map_, 'added_cat', div, this.opts);
 }
 
 function sigmoid(t) {
@@ -368,7 +388,6 @@ MOverlay.prototype.hide = function() {
 
 MOverlay.prototype.show = function() {
   if (!this.div_) {
-    console.log("adding..");
     this.onAdd();
     this.draw();
   }
