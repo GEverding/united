@@ -54,7 +54,10 @@ exports.pins = function(req, res){
 };
 
 exports.index = function(req, res){
-  res.render('index', { title: title, err: null });
+  res.render('index', {
+    title: title,
+    err: null
+  });
 };
 
 exports.found = function(req, res){
@@ -103,6 +106,8 @@ exports.index_submit = function(req, res){
     }
     else {
       console.log("fail")
+      res.status(500)
+      res.json({err: "Failed Recaptcha" })
         // Redisplay the form.
 
     }
