@@ -90,7 +90,7 @@ function placeOverlayAt(opts) {
   });
 
   $(".submit-cat", $modal).click(function(){
-    var name = $("#name", $modal).val();
+    var name = $("#contestName", $modal).val();
     var email = $("#email", $modal).val();
 
     if (name === "" || email === "") {
