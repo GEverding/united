@@ -10,7 +10,12 @@ var path = require("path");
 var zlib = require("zlib");
 var fs = require('fs');
 var _ = require("underscore");
+var recaptcha = require('recaptcha').Recaptcha;
 var ArrayFormatter = require('../formatters').ArrayFormatter;
+
+
+var PUBLIC_KEY  = '6LcXaNYSAAAAAIVQ-H4GWTwuKi_kBq_4ixT0H3YG',
+    PRIVATE_KEY = '6LcXaNYSAAAAALLH4B2VmNIqj8oh_FdjyD8aJ5Pb';
 
 var Schema   = mongoose.Schema;
 var ObjectId = Schema.ObjectId;
@@ -82,6 +87,25 @@ exports.claimed = function(req, res) {
 
 exports.index_submit = function(req, res){
   console.log(req.body);
+
+  var data = {
+    remoteip:  req.connection.remoteAddress,
+    challenge: req.body.recaptcha_challenge_field,
+    response:  req.body.recaptcha_response_field
+  };
+  var recaptcha = new Recaptcha(PUBLIC_KEY, PRIVATE_KEY, data);
+
+  recaptcha.verify(function(success, error_code) {
+    if (success) {
+      console.log("success")
+      //res.send('Recaptcha response valid.');
+    }
+    else {
+      console.log("fail")
+        // Redisplay the form.
+
+    }
+  });
 
   var form = req.body;
   var hasErr = false;
