@@ -28,7 +28,6 @@ script
               name_startsWith: query
             },
             success: function( data ) {
-              console.log(data.geonames);
               typeahead.process( $.map( data.geonames, function( item ) {
                 return {
                   label: item.name + (item.adminName1 ? ", " + item.adminName1 : "") + ", " + item.countryName,
@@ -46,10 +45,8 @@ script
           });
         },
         onselect: function(obj){
-          console.log(obj);
 
           $("#lat").val(obj.value.lat);
-          console.log($("#lat").val())
           pin.lat = obj.value.lat;
 
           $("#lng").val(obj.value.long);

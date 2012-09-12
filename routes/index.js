@@ -95,12 +95,10 @@ exports.index_submit = function(req, res){
     challenge: req.body.recaptcha_challenge_field,
     response:  req.body.recaptcha_response_field
   };
-  console.log(data);
   var recaptcha = new Recaptcha(PUBLIC_KEY, PRIVATE_KEY, data);
 
   recaptcha.verify(function(success, error_code) {
     if (success) {
-      console.log("success")
 
       var form = req.body;
       var hasErr = false;
@@ -123,7 +121,6 @@ exports.index_submit = function(req, res){
       }
 
       var pin = new Pin(form);
-      console.log(pin.toObject())
       pin.save();
 
       res.cookie('unitedMarker', pin._id, {expires: null, path: '/'})
@@ -132,10 +129,8 @@ exports.index_submit = function(req, res){
       res.render('done', { title: title, err: null });
     }
     else {
-      console.log("fail")
       res.status(500)
       return res.json({err: "Failed Captcha", msg: "", err_code: error_code })
-        // Redisplay the form.
 
     }
   });
