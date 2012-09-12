@@ -248,13 +248,15 @@ function validate(event){
         event.data.map.panTo(new google.maps.LatLng(pin.lat, pin.long));
         Recaptcha.destroy()
       },
-      error: function() {
+      error: function(fail) {
+        var ret = JSON.parse(fail.responseText);
         console.log("error");
+        Recaptcha.reload();
+        $("#form-err").show()
+        $("#form-err").append("<strong>Error!</strong> "+ ret.err)
         // clear form? or just reload captcha?
       }
     });
-
-
 }
 
 //
