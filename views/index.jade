@@ -54,12 +54,16 @@ script
 
         }
       });
-      Recaptcha.create("6LcXaNYSAAAAAIVQ-H4GWTwuKi_kBq_4ixT0H3YG", "recaptcha",
-      {
-        theme: "clean",
-        callback: Recaptcha.focus_response_field
+      function createCaptcha(){
+        Recaptcha.create("6LcXaNYSAAAAAIVQ-H4GWTwuKi_kBq_4ixT0H3YG", "recaptcha",
+          {
+            theme: "clean",
+            callback: Recaptcha.focus_response_field
+          }
+        );
       }
-      );
+      createCaptcha();
+
     });
 
 
@@ -91,7 +95,7 @@ br
       a.btn.btn-primary.submit-cat(href="#") Submit
 
 #main
-  #map_canvas(style="height: 750px; width: 100%;")
+  #map_canvas(style="height: 550px; width: 100%;")
 
   #form.rightform
 

@@ -233,6 +233,9 @@ function validate(event){
     }
     pin.lat = lat.val();
     pin.long = lng.val();
+
+    pin.recaptcha_challenge_field = Recaptcha.get_challenge()
+    pin.recaptcha_response_field = Recaptcha.get_response()
     $.ajax({
       type: "POST",
       url: "",
@@ -243,6 +246,11 @@ function validate(event){
         //$(".alert").close();
         placePin(pin, event.data.map, event.data.info_window);
         event.data.map.panTo(new google.maps.LatLng(pin.lat, pin.long));
+        Recaptcha.destroy()
+      },
+      error: function() {
+        console.log("error");
+        // clear form? or just reload captcha?
       }
     });
 

@@ -10,7 +10,7 @@ var path = require("path");
 var zlib = require("zlib");
 var fs = require('fs');
 var _ = require("underscore");
-var recaptcha = require('recaptcha').Recaptcha;
+var Recaptcha = require('recaptcha').Recaptcha;
 var ArrayFormatter = require('../formatters').ArrayFormatter;
 
 
@@ -93,6 +93,7 @@ exports.index_submit = function(req, res){
     challenge: req.body.recaptcha_challenge_field,
     response:  req.body.recaptcha_response_field
   };
+  console.log(data);
   var recaptcha = new Recaptcha(PUBLIC_KEY, PRIVATE_KEY, data);
 
   recaptcha.verify(function(success, error_code) {
