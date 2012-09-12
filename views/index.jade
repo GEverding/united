@@ -56,7 +56,7 @@ script
                   value: {
                     address: item.name + (item.adminName1 ? ", " + item.adminName1 : "") + ", " + item.countryName,
                     lat: item.lat,
-                    long: item.lng
+                    lng: item.lng
                   }
                 }
               }));
@@ -71,8 +71,8 @@ script
           $("#lat").val(obj.value.lat);
           pin.lat = obj.value.lat;
 
-          $("#lng").val(obj.value.long);
-          pin.long = obj.value.long;
+          $("#lng").val(obj.value.lng);
+          pin.lng = obj.value.lng;
 
         }
       });

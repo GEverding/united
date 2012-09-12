@@ -10,7 +10,7 @@ var pin = {
     zip: "",
     message: "",
     lat: null,
-    long: null
+    lng: null
 };
 
 function requestPosition(cb) {
@@ -36,7 +36,7 @@ function requestPosition(cb) {
 function successCallback(position, cb) {
     if (position !== null) {
       pin.lat = position.coords.latitude;
-      pin.long = position.coords.longitude;
+      pin.lng = position.coords.longitude;
     }
     cb(initialize());
 }
@@ -127,9 +127,9 @@ function initialize() {
   var lng = -99.62;
   var zoom = 4;
 
-  if (pin.lat !== null && pin.long !== null) {
+  if (pin.lat !== null && pin.lng !== null) {
     lat = pin.lat;
-    lng = pin.long;
+    lng = pin.lng;
     zoom = 10;
   }
 
@@ -186,7 +186,7 @@ function initialize() {
         var pin = pins[i];
         var cookie = $.cookie("unitedMarker");
         if( cookie === pin._id ){
-          map.panTo(new google.maps.LatLng(pin.lat, pin.long));
+          map.panTo(new google.maps.LatLng(pin.lat, pin.lng));
         }
         placePin(pin, map, info_window);
       }
@@ -200,7 +200,7 @@ function placePin(pin, map, info_window){
     map: map,
     animation: google.maps.Animation.DROP,
     title: pin.name,
-    position: new google.maps.LatLng(pin.lat, pin.long),
+    position: new google.maps.LatLng(pin.lat, pin.lng),
     html: "<p><strong>"+ pin.message +"</strong></p><br/><strong><i> - "+ pin.name +"</i></strong></footer>"
   });
   google.maps.event.addListener(m, 'click', (function(m) {
@@ -245,7 +245,7 @@ function validate(event){
       geocoder.geocode({"address": address}, function(res, status){
         if(status === google.maps.GeocoderStatus.OK){
           pin.lat = res[0].geometry.location.Xa;
-          pin.long = res[0].geometry.location.Ya;
+          pin.lng = res[0].geometry.location.Ya;
         }
         else {
           return false
@@ -254,7 +254,7 @@ function validate(event){
       });
     }
     pin.lat = lat.val();
-    pin.long = lng.val();
+    pin.lng = lng.val();
 
     pin.recaptcha_challenge_field = Recaptcha.get_challenge()
     pin.recaptcha_response_field = Recaptcha.get_response()
@@ -265,7 +265,7 @@ function validate(event){
       success: function() {
         $("#form").slideUp();
         placePin(pin, event.data.map, event.data.info_window);
-        event.data.map.panTo(new google.maps.LatLng(pin.lat, pin.long));
+        event.data.map.panTo(new google.maps.LatLng(pin.lat, pin.lng));
         Recaptcha.destroy()
       },
       error: function(fail) {
