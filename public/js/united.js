@@ -3,6 +3,8 @@ var united = united || {};
 
 var nav = null;
 var geocoder = null;
+var google_map = null;
+var info_window = null;
 var pin = {
     name: "",
     city: "",
@@ -37,8 +39,8 @@ function successCallback(position) {
     console.log(position.coords.latitude + ', ' + position.coords.longitude);
     pin.lat = position.coords.latitude;
     pin.long = position.coords.longitude;
-    $("#lat").val(pin.lat);
-    $("#lng").val(pin.long);
+    //$("#lat").val(pin.lat);
+    //$("#lng").val(pin.long);
     initialize();
 
 }
@@ -77,48 +79,63 @@ function placeOverlayAt(map, lat, lng, difficulty) {
 
 function initialize() {
   geocoder = new google.maps.Geocoder();
+  var lat, lng, zoom
+  if(pin.lat === null && pin.long === null){
+    lat = 80;
+    lng = 120;
+    zoom = 4;
+  }
+  else {
+    lat = pin.lat;
+    lng = pin.long;
+    zoom = 10;
+  }
   var map_options = {
-      center: new google.maps.LatLng(pin.lat, pin.long),
-      zoom: 10,
+      center: new google.maps.LatLng(lat, lng),
+      zoom: zoom,
       mapTypeId: google.maps.MapTypeId.ROADMAP
   };
 
-  var google_map = new google.maps.Map(document.getElementById("map_canvas"), map_options);
+  google_map = new google.maps.Map(document.getElementById("map_canvas"), map_options);
 
   placeOverlayAt(google_map, 43.47865, -80.54977);
 
-  var info_window = new google.maps.InfoWindow({
+  info_window = new google.maps.InfoWindow({
       content: 'loading'
   });
   var pins = null;
   $.ajax({
     type: "GET",
     url: "pins",
-    //headers: { "Accept-Encoding" : "gzip" },
     success: function(data) {
-      console.log("Successfull GET");
       pins = JSON.parse(data);
-      console.log(pins);
+      console.log("Pins: ", pins);
+      for(var i = 0; i < pins.results.length; i++){
 
-      for(i in pins.results){
-
-        var res = pins.results[i];
-        var m = new google.maps.Marker({
-          map: google_map,
-          animation: google.maps.Animation.DROP,
-          title: res.Name,
-          position: new google.maps.LatLng(res.lat, res.long),
-          html: "<p><strong>"+ res.message +"</strong></p><br/><strong><i> - "+ res.name +"</i></strong></footer>"
-        });
-        console.log(m)
-        google.maps.event.addListener(m, 'click', function() {
-            info_window.setContent(this.html);
-            info_window.open(google_map, this);
-        });
+        var pin = pins.results[i];
+        console.log("Placing pin: ", pin)
+        placePin(pin);
 
       }
     }
   });
+}
+
+function placePin(pin){
+  var m = new google.maps.Marker({
+    map: google_map,
+    animation: google.maps.Animation.DROP,
+    title: pin.name,
+    position: new google.maps.LatLng(pin.lat, pin.long),
+    html: "<p><strong>"+ pin.message +"</strong></p><br/><strong><i> - "+ pin.name +"</i></strong></footer>"
+  });
+  console.log(m)
+  google.maps.event.addListener(m, 'click', (function(m) {
+    return function(){
+      info_window.setContent(m.html);
+      info_window.open(google_map, m);
+    }
+  })(m));
 }
 
 function validate(){
@@ -141,8 +158,8 @@ function validate(){
     var substr = input.val().split(', ');
     if(substr.length !== 3){
       input.closest('.control-group').addClass('error');
-      $("#alert").show()
-      $("#alert").append('<strong>Invalid Location!</strong> Require: City, State/Province, Country');
+      $("#error").show()
+      $("#error").append('<strong>Invalid Location!</strong> Require: City, State/Province, Country');
       return false
 
     }
@@ -169,6 +186,10 @@ function validate(){
           pin.lat = res[0].geometry.location.Xa;
           pin.long = res[0].geometry.location.Ya;
         }
+        else {
+          return false
+          // use html5 geo api
+        }
       });
     }
     $.ajax({
@@ -178,7 +199,9 @@ function validate(){
       success: function() {
         console.log("Successfull POST");
         $("#form").slideUp();
-        $("#alert").close();
+        //$(".alert").close();
+        placePin(pin);
+        google_map.panTo(new google.maps.LatLng(pin.lat, pin.long));
       }
     });
 

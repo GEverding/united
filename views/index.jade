@@ -42,12 +42,13 @@ script
         },
         onselect: function(obj){
           console.log(obj);
-          if($("#lat").val() === ""){
-            $("#lat").val(obj.lat);
-          }
-          if($("#long").val() === ""){
-            $("#long").val(obj.long);
-          }
+
+          $("#lat").val(obj.lat);
+          pin.lat = obj.lat;
+
+          $("#long").val(obj.long);
+          pin.long = obj.lng;
+
         }
       });
     });
