@@ -1,11 +1,6 @@
-h1= title
-p Welcome To Monstercat United:)
-
-if err
-  .alert= err
-#error.alert(style="display: none;")
-  button.close(type="button", data-dismiss="alert") x
-
+#header
+  h1= title
+  p Welcome To Monstercat United:)
 
 script
   $(document).ready(function(){
@@ -92,7 +87,7 @@ br
 #main
   #map_canvas(style="height: 750px; width: 100%;")
 
-  #form(style="position: absolute; top: 150px; right: 0px;")
+  #form.rightform
 
     form.form-horizontal(method="", enctype="multipart/form-data")
       fieldset
