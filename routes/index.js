@@ -70,6 +70,16 @@ exports.found = function(req, res){
   });
 };
 
+exports.claimed = function(req, res) {
+  var formatter = new ArrayFormatter();
+  var gzipper   = zlib.createGzip();
+
+  Egg.find(function(err, eggs){
+    var ids = _(eggs).map(function(egg){ return egg.eggId; });
+    return res.json(ids);
+  });
+};
+
 exports.index_submit = function(req, res){
   console.log(req.body);
 

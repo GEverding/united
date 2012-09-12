@@ -11,8 +11,11 @@ script
   $(document).ready(function(){
       var map, info_window;
       requestPosition(function(obj){
-          $("#submit").on("click", {map: obj.map, info_window: obj.info_window}, validate);
-        });
+        $("#submit").on("click", {
+          map: obj.map, 
+          info_window: obj.info_window
+        }, validate);
+      });
 
       $("#location").typeahead({
         property: "label",

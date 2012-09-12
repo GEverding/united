@@ -140,12 +140,19 @@ function initialize() {
 
   var map = new google.maps.Map(document.getElementById("map_canvas"), map_options);
 
-  placeOverlayAt({
-    map: map,
-    lat: 43.47865,
-    lng: -80.54977,
-    eggId: 'a',
-    difficulty: 10
+  var overlays = [
+    { map: map, lat: 43.47865, lng: -80.54977, eggId: 'a', difficulty: 10 }
+  ];
+
+  $.ajax({
+    type: "GET",
+    url: "/found",
+    success: function(claimed){
+      var nonClaimedOverlays = _(overlays).filter(function(overlay){
+        return _(claimed).include(overlay.eggId);
+      });
+      _(nonClaimedOverlays).each(placeOverlayAt);
+    }
   });
 
   var info_window = new google.maps.InfoWindow({
