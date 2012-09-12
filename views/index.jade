@@ -5,7 +5,9 @@
 
 script
   $(document).ready(function(){
-      var map, info_window;
+      if( $.cookie('unitedMarker') !== null ){
+        $("#form").hide();
+      }
       requestPosition(function(obj){
         $("#submit").on("click", {
           map: obj.map,

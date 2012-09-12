@@ -165,6 +165,11 @@ function initialize() {
       for(var i = 0; i < pins.results.length; i++){
         var pin = pins.results[i];
         console.log("Placing pin: ", pin)
+        var cookie = $.cookie("unitedMarker");
+        if( cookie === pin._id ){
+          console.log("found your pin")
+          map.panTo(new google.maps.LatLng(pin.lat, pin.long));
+        }
         placePin(pin, map, info_window);
       }
     }

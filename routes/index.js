@@ -126,6 +126,9 @@ exports.index_submit = function(req, res){
       console.log(pin.toObject())
       pin.save();
 
+      res.cookie('unitedMarker', pin._id, {expires: null, path: '/'})
+
+
       res.render('done', { title: title, err: null });
     }
     else {
