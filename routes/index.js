@@ -29,9 +29,6 @@ var EggSchema = new Schema({
 
 var PinSchema = new Schema({
     name: String
-  , city: String
-  , state: String
-  , zipCode: String
   , message: String
   , lat: Number
   , long: Number
@@ -44,7 +41,10 @@ exports.pins = function(req, res){
   var formatter = new ArrayFormatter();
   var gzipper   = zlib.createGzip();
 
-  res.writeHead(200, { 'content-encoding': 'gzip' });
+  res.writeHead(200, {
+    'content-encoding': 'gzip',
+    'content-type': 'application/json'
+  });
 
   Pin.find({})
      .stream()
@@ -149,17 +149,21 @@ exports.index_submit = function(req, res){
         return res.json({err: err });
       }
 
-      var pin = new Pin(form);
+      var pin = new Pin({
+        name: form.name,
+        lat: form.lat,
+        long: form.long,
+        message: form.message
+      });
+
       pin.save();
 
-      res.cookie('unitedMarker', pin._id, {expires: null, path: '/'})
-
-
+      res.cookie('unitedMarker', pin._id, {expires: null, path: '/'});
       res.render('done', { title: title, err: null });
     }
     else {
-      res.status(500)
-      return res.json({err: "Failed Captcha", msg: "", err_code: error_code })
+      res.status(500);
+      return res.json({err: "Failed Captcha", msg: "", err_code: error_code });
 
     }
   });

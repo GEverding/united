@@ -161,10 +161,11 @@ function initialize() {
   $.ajax({
     type: "GET",
     url: "pins",
+
     success: function(data) {
-      pins = JSON.parse(data);
-      for(var i = 0; i < pins.results.length; i++){
-        var pin = pins.results[i];
+      var pins = data.results;
+      for(var i = 0; i < pins.length; i++){
+        var pin = pins[i];
         var cookie = $.cookie("unitedMarker");
         if( cookie === pin._id ){
           map.panTo(new google.maps.LatLng(pin.lat, pin.long));
@@ -173,7 +174,7 @@ function initialize() {
       }
     }
   });
-  return { map: map, info_window: info_window }
+  return { map: map, info_window: info_window };
 }
 
 function placePin(pin, map, info_window){
