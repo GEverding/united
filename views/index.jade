@@ -60,11 +60,25 @@ br
     button.close(type="button", data-dismiss="modal", aria-hidden="true")
       | &times;
     h3 You found a hidden Monstercat!
-    .modal-body 
-      p Awesome
+    .modal-body
+      p
+        | You have won a Monstercat shirt and bag! Enter your email and name so we
+        | can contact you for your info.
+
+    form.form-horizontal
+      fieldset
+        .control-group
+          label.control-label(for="name") Name
+          .controls
+            input#name(type="text", name="name")
+        .control-group
+          label.control-label(for="email") Email
+          .controls
+            input#email(type="text", name="email")
+
     .modal-footer
       a.btn(href="#", data-dismiss="modal") Close
-      a.btn.btn-primary(href="#") Submit
+      a.btn.btn-primary.submit-cat(href="#") Submit
 
 #main
   #map_canvas(style="height: 750px; width: 100%;")

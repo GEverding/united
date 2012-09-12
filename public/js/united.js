@@ -47,7 +47,7 @@ function placeOverlayAt(opts) {
   var map = opts.map;
   var lat = opts.lat;
   var lng = opts.lng;
-  var pinId = opts.pinId;
+  var eggId = opts.eggId;
   var difficulty = opts.difficulty || 11;
 
   var hw = 0.004;
@@ -83,8 +83,35 @@ function placeOverlayAt(opts) {
   on('center_changed', showOrHide);
   on('added_cat', function(div){
     $(div).click(function(){
-      console.log($modal);
       $modal.modal();
+    });
+  });
+
+  $(".submit-cat", $modal).click(function(){
+    var name = $("#name", $modal).val();
+    var email = $("#email", $modal).val();
+
+    if (name === "" || email === "") {
+      alert("Please fill in both fields");
+      return;
+    }
+
+    $.ajax({
+      type: 'POST',
+      url: '/found',
+      data: {
+        name: name,
+        email: email,
+        eggId: opts.eggId,
+        claimedAt: new Date()
+      },
+      success: function(){
+        $modal.modal('hide');
+      },
+      error: function(){
+        alert("This has already been claimed, sorry :(");
+        $modal.modal('hide');
+      }
     });
   });
 }
@@ -103,7 +130,7 @@ function initialize() {
     map: map,
     lat: 43.47865,
     lng: -80.54977,
-    pinId: 'a',
+    eggId: 'a',
     difficulty: 10
   });
 

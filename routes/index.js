@@ -15,6 +15,13 @@ var ArrayFormatter = require('../formatters').ArrayFormatter;
 var Schema   = mongoose.Schema;
 var ObjectId = Schema.ObjectId;
 
+var EggSchema = new Schema({
+    name: String
+  , email: String
+  , eggId: String
+  , claimedAt: Date
+});
+
 var PinSchema = new Schema({
     name: String
   , city: String
@@ -26,6 +33,7 @@ var PinSchema = new Schema({
 });
 
 var Pin = mongoose.model('Pin', PinSchema);
+var Egg = mongoose.model('Egg', EggSchema);
 
 exports.pins = function(req, res){
   var formatter = new ArrayFormatter();
@@ -42,6 +50,24 @@ exports.pins = function(req, res){
 
 exports.index = function(req, res){
   res.render('index', { title: title, err: null });
+};
+
+exports.found = function(req, res){
+  var form = req.body;
+
+  Egg.findOne({ eggId: form.eggId }, function(err, doc){
+    console.log(err, doc);
+    var alreadyFound = !!doc;
+    if (alreadyFound) {
+      res.status(500);
+      return res.json({ err: "already found :(", err_code: "already_found" });
+    }
+
+    var egg = new Egg(form);
+    egg.save();
+
+    return res.json({ message: "Congrats!" });
+  });
 };
 
 exports.index_submit = function(req, res){
@@ -68,6 +94,7 @@ exports.index_submit = function(req, res){
     res.status(500);
     return res.json({err: err });
   }
+
   var pin = new Pin(form);
   console.log(pin.toObject())
   console.log("im here");
