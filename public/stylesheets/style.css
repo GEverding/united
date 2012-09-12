@@ -11,31 +11,31 @@ a {
 }
 
 #map_canvas {
-  height: 750px;
   position: absolute;
-  top: 110px;
+  top: 0px;
+  z-index: -10;
 }
 
 .rightform {
   position: absolute;
   top: 110px;
   right: 0px;
-  background-color: white;
+  background-color: rgba(255,255,255,0.75);
   background-repeat: repeat-x repeat-y;
+  border-bottom-left-radius: 3px;
   overflow: auto;
-  width: 300px;
+  width: 310px;
   padding: 10px;
 }
 
 #header {
-  height: 89px;
+  height: 90px;
   position: absolute;
   top: 0px;
-  background-image: url("/img/light_wool.png");
+  background-color: rgba(255,255,255,0.75);
   background-repeat: repeat-x;
-  width: 100%;
+  width: 99%;
   padding: 10px;
-  border-bottom: 1px solid #ddd;
 }
 
 .form-horizontal .controls {

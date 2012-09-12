@@ -1,6 +1,7 @@
 #header
-  h1= title
-  p Welcome To Monstercat United:)
+  img(src="/img/graphic1.png")
+  .pull-right
+    img(src="/img/graphic2.png", width="95%", height="95%")
 
 script
   $(document).ready(function(){
@@ -57,7 +58,7 @@ script
       function createCaptcha(){
         Recaptcha.create("6LcXaNYSAAAAAIVQ-H4GWTwuKi_kBq_4ixT0H3YG", "recaptcha",
           {
-            theme: "clean",
+            theme: "white",
             callback: Recaptcha.focus_response_field
           }
         );
@@ -95,7 +96,7 @@ br
       a.btn.btn-primary.submit-cat(href="#") Submit
 
 #main
-  #map_canvas(style="height: 550px; width: 100%;")
+  #map_canvas(style="height: 100%; width: 100%;")
 
   #form.rightform
     .alert#form-err(style="display: none;")
