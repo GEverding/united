@@ -368,7 +368,6 @@ MOverlay.prototype.hide = function() {
 
 MOverlay.prototype.show = function() {
   if (!this.div_) {
-    console.log("adding..");
     this.onAdd();
     this.draw();
   }
