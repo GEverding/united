@@ -19,30 +19,28 @@ function requestPosition(cb) {
     }
     if (nav != null) {
         var geoloc = nav.geolocation;
+        console.log(geoloc);
         if (geoloc != null) {
             geoloc.getCurrentPosition(function(position){
               successCallback(position, cb);
+            }, function(error){
+              successCallback(null, cb);
             });
         }
-        else {
-            console.log("geolocation not supported");
-        }
-    }
-    else {
-        console.log("Navigator not found");
+    } else {
+      successCallback(null, cb);
     }
 }
 
 
 
 function successCallback(position, cb) {
-    console.log(position.coords.latitude + ', ' + position.coords.longitude);
-    pin.lat = position.coords.latitude;
-    pin.long = position.coords.longitude;
-    //$("#lat").val(pin.lat);
-    //$("#lng").val(pin.long);
+    if (position !== null) {
+      console.log(position.coords.latitude + ', ' + position.coords.longitude);
+      pin.lat = position.coords.latitude;
+      pin.long = position.coords.longitude;
+    }
     cb(initialize());
-
 }
 
 function placeOverlayAt(opts) {
@@ -120,23 +118,21 @@ function placeOverlayAt(opts) {
 
 function initialize() {
   geocoder = new google.maps.Geocoder();
-  var lat, lng, zoom
-  if(pin.lat === null && pin.long === null){
-    lat = 80;
-    lng = 120;
-    zoom = 4;
-  }
-  else {
+  var lat = 39.49;
+  var lng = -99.62;
+  var zoom = 4;
+
+  if (pin.lat !== null && pin.long !== null) {
     lat = pin.lat;
     lng = pin.long;
     zoom = 10;
   }
+
   var map_options = {
       center: new google.maps.LatLng(lat, lng),
       zoom: zoom,
       mapTypeId: google.maps.MapTypeId.ROADMAP
   };
-
 
   var map = new google.maps.Map(document.getElementById("map_canvas"), map_options);
 
