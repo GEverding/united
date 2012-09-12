@@ -6,7 +6,8 @@
 var express = require('express')
   , routes = require('./routes')
   , mongoose = require('mongoose')
-  , path    = require('path');
+  , path    = require('path')
+  , recaptcha = require('recaptcha').Recaptcha;
 
 var app = module.exports = express.createServer();
 
