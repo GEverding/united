@@ -96,27 +96,25 @@ function initialize() {
     url: "pins",
     //headers: { "Accept-Encoding" : "gzip" },
     success: function(data) {
-      console.log("Successfull get");
+      console.log("Successfull GET");
       pins = JSON.parse(data);
       console.log(pins);
 
       for(i in pins.results){
 
         var res = pins.results[i];
-        console.log(res);
         var m = new google.maps.Marker({
           map: google_map,
           animation: google.maps.Animation.DROP,
           title: res.Name,
           position: new google.maps.LatLng(res.lat, res.long),
-          html: "<p><strong>"+ res.message +"</strong></p><footer><strong><i> - "+ res.name +"</i></strong></footer>"
+          html: "<p><strong>"+ res.message +"</strong></p><br/><strong><i> - "+ res.name +"</i></strong></footer>"
         });
         console.log(m)
         google.maps.event.addListener(m, 'click', function() {
             info_window.setContent(this.html);
             info_window.open(google_map, this);
         });
-        console.log("what is going on")
 
       }
     }
@@ -124,38 +122,33 @@ function initialize() {
 }
 
 function validate(){
-    console.log("Validate Fire");
     var input = null;
     var val = null;
     var err;
     input = $("#name")
     if(input.val() === "" || input.val().length < 2){
       input.closest('.control-group').addClass('error');
+
       return false
     }
     pin.name = input.val()
 
-    input = $("#state")
+    input = $("#location")
     if(input.val() === "" || input.val().length < 2) {
       input.closest('.control-group').addClass('error');
       return false;
     }
-    pin.state = input.val();
-
-
-    input = $("#city")
-    if(input.val() === "" || input.val().length < 2) {
+    var substr = input.val().split(', ');
+    if(substr.length !== 3){
       input.closest('.control-group').addClass('error');
-      return false;
-    }
-    pin.city = input.val();
+      $("#alert").show()
+      $("#alert").append('<strong>Invalid Location!</strong> Require: City, State/Province, Country');
+      return false
 
-    input = $("#zip")
-    if(input.val() === "" || input.val().length < 2){
-       input.closest('.control-group').addClass('error');
-       return false;
     }
-    pin.zip = input.val();
+    pin.city = substr[0] || ""
+    pin.state = substr[1] || ""
+    pin.country = substr[2] || ""
 
     input = $("#msg")
     if(input.val() === "" || input.val().length <= 1 || input.val().length > 140){
@@ -167,7 +160,8 @@ function validate(){
     lat = $("#lat");
     lng = $("#lng");
     if(lat.val() === "" && lng.val() === "" ){
-      var address = $("#city").val() + ", " + $("#state").val() + ", " + $("#zip").val();
+      var address = $("#location").val();
+
       console.log(address);
       geocoder.geocode({"address": address}, function(res, status){
         if(status === google.maps.GeocoderStatus.OK){
@@ -182,8 +176,9 @@ function validate(){
       url: "",
       data: pin,
       success: function() {
-        console.log("Successfull post");
+        console.log("Successfull POST");
         $("#form").slideUp();
+        $("#alert").close();
       }
     });
 

@@ -3,10 +3,55 @@ p Welcome To Monstercat United:)
 
 if err
   .alert= err
+#alert.alert(style="display: none;")
+  button.close(type="button", data-dismiss="alert") x
+
+
 script
   $(document).ready(function(){
       requestPosition();
+      $("#location").typeahead({
+        property: "label",
+        source: function(typeahead, query){
+          $.ajax({
+            url: "http://ws.geonames.org/searchJSON",
+            dataType: "jsonp",
+            data: {
+              featureClass: "P",
+              style: "full",
+              maxRows: 12,
+              name_startsWith: query
+            },
+            success: function( data ) {
+              console.log(data.geonames);
+              typeahead.process( $.map( data.geonames, function( item ) {
+                return {
+                  label: item.name + (item.adminName1 ? ", " + item.adminName1 : "") + ", " + item.countryName,
+                  value: {
+                    address: item.name + (item.adminName1 ? ", " + item.adminName1 : "") + ", " + item.countryName,
+                    lat: item.lat,
+                    long: item.lng
+                  }
+                }
+              }));
+            },
+            error: function() {
+
+            }
+          });
+        },
+        onselect: function(obj){
+          console.log(obj);
+          if($("#lat").val() === ""){
+            $("#lat").val(obj.lat);
+          }
+          if($("#long").val() === ""){
+            $("#long").val(obj.long);
+          }
+        }
+      });
     });
+
 
 br
 #main
@@ -18,22 +63,17 @@ br
       fieldset
         .control-group
           label.control-label(for="name") Name
+            em *
           .controls
             input#name(type="text", name="name")
         .control-group
-          label.control-label(for="city") City&#47;Town
+          label.control-label(for="location") Location
+            em *
           .controls
-            input#city(type="text", name="city")
-        .control-group
-          label.control-label(for="state") State&#47;Province
-          .controls
-            input#state(type="text", name="state")
-        .control-group
-          label.control-label(for="zip") Zipcode&#47;Postal Code
-          .controls
-            input#zip(type="text", name="zip")
+            input#location(type="text", name="location", autocomplete="off")
         .control-group
           label.control-label(for="state") Message
+            em *
           .controls
             textarea#msg(rows="3")
             span.help-block 140 Character Limit
@@ -42,5 +82,3 @@ br
         input#lng(type="hidden", name="lng")
         fieldset.pull-right(style="padding-right: 50px;")
           button#submit.btn.btn-small(type="button", onclick="validate()") Submit
-          button#cancel.btn.btn-small(type="button", onclick="cancel()") Cancel
-
