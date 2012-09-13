@@ -42,7 +42,6 @@ function successCallback(position, cb) {
 }
 
 function placeOverlayAt(opts) {
-  console.log("Adding " + opts.eggId);
   var map = opts.map;
   var lat = opts.lat;
   var lng = opts.lng;
@@ -196,11 +195,12 @@ function initialize() {
 }
 
 function placePin(pin, map, info_window){
+  var r = Math.random() / 18;
   var m = new google.maps.Marker({
     map: map,
     animation: google.maps.Animation.DROP,
     title: pin.name,
-    position: new google.maps.LatLng(pin.lat, pin.lng),
+    position: new google.maps.LatLng(pin.lat + r, pin.lng + r),
     html: "<p><strong>"+ pin.message +"</strong></p><br/><strong><i> - "+ pin.name +"</i></strong></footer>"
   });
   google.maps.event.addListener(m, 'click', (function(m) {
