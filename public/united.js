@@ -10,7 +10,7 @@ var pin = {
     zip: "",
     message: "",
     lat: null,
-    long: null
+    lng: null
 };
 
 function requestPosition(cb) {
@@ -36,7 +36,7 @@ function requestPosition(cb) {
 function successCallback(position, cb) {
     if (position !== null) {
       pin.lat = position.coords.latitude;
-      pin.long = position.coords.longitude;
+      pin.lng = position.coords.longitude;
     }
     cb(initialize());
 }
@@ -46,16 +46,17 @@ function placeOverlayAt(opts) {
   var lat = opts.lat;
   var lng = opts.lng;
   var eggId = opts.eggId;
-  var difficulty = opts.difficulty || 11;
+  var scale = opts.scale || 0.2;
+  var difficulty = opts.difficulty || 12;
 
-  var hw = 0.004;
-  var hh = 0.0031;
+  var hw = 0.004 * scale;
+  var hh = 0.0031 * scale;
   var swBound = new google.maps.LatLng(lat - hw, lng - hh);
   var neBound = new google.maps.LatLng(lat + hw, lng + hh);
   var bounds = new google.maps.LatLngBounds(swBound, neBound);
 
   var srcImage = '/img/monstercat_findme.png';
-  overlay = new MOverlay(bounds, srcImage, map, difficulty);
+  var overlay = new MOverlay(bounds, srcImage, map, difficulty, opts);
 
   function on(evt, cb) {
     google.maps.event.addListener(map, evt, cb);
@@ -63,11 +64,12 @@ function placeOverlayAt(opts) {
 
   function shouldShow() {
     var zoom = map.getZoom();
-    return zoom > 9 && bounds.intersects(map.getBounds());
+    return zoom > 8 && bounds.intersects(map.getBounds());
   }
 
   function showOrHide() {
     var center = map.getCenter();
+
     if (shouldShow()) {
       overlay.show();
     } else {
@@ -79,10 +81,12 @@ function placeOverlayAt(opts) {
 
   on('zoom_changed', showOrHide);
   on('center_changed', showOrHide);
-  on('added_cat', function(div){
+
+  on('added_cat', function(div, opts_){
     $(div).click(function(){
       $modal.modal();
-      $("#modalEggId", $modal).val(opts.eggId);
+      $("#modalEggId", $modal).val(opts_.eggId);
+      $("#modalMsg",   $modal).text(opts_.message || "");
     });
   });
 
@@ -123,9 +127,9 @@ function initialize() {
   var lng = -99.62;
   var zoom = 4;
 
-  if (pin.lat !== null && pin.long !== null) {
+  if (pin.lat !== null && pin.lng !== null) {
     lat = pin.lat;
-    lng = pin.long;
+    lng = pin.lng;
     zoom = 10;
   }
 
@@ -138,8 +142,22 @@ function initialize() {
   var map = new google.maps.Map(document.getElementById("map_canvas"), map_options);
 
   var overlays = [
-    { map: map, lat: 43.47865, lng: -80.54977, eggId: 'a', difficulty: 10 },
-    { map: map, lat: 35.66052, lng: -106.06499, eggId: 'b', difficulty: 9 }
+    { map: map, lat: 29.975309, lng: 31.137751, eggId: 'a', difficulty: 12,
+      message: "The original Monstercat."
+    },
+    { map: map, lat: 61.502224, lng: 23.71985, eggId: 'b', difficulty: 12,
+      message: "Oldest operational Sauna in Finland!"
+    },
+    { map: map, lat: 35.50936, lng: -105.918694, eggId: 'c', difficulty: 12,
+      message: ""
+    },
+    { map: map, lat: 27.9856, lng: 86.9233, eggId: 'd', difficulty: 12,
+      message: "#OperationDethrone"
+    },
+    { map: map, lat: -19.39, lng: 46.64, eggId: 'e', difficulty: 12,
+      message: "You have found the secret Monstercat. SHUT. DOWN. EVERYTHING.",
+      scale: 8
+    }
   ];
 
   $.ajax({
@@ -168,7 +186,7 @@ function initialize() {
         var pin = pins[i];
         var cookie = $.cookie("unitedMarker");
         if( cookie === pin._id ){
-          map.panTo(new google.maps.LatLng(pin.lat, pin.long));
+          map.panTo(new google.maps.LatLng(pin.lat, pin.lng));
         }
         placePin(pin, map, info_window);
       }
@@ -178,11 +196,16 @@ function initialize() {
 }
 
 function placePin(pin, map, info_window){
+  var b1 = Math.random() / 18;
+  var b2 = Math.random() / 18;
+  var r2 = Math.random() > 0.5 ? 1 : -1;
+  var r3 = Math.random() > 0.5 ? 1 : -1;
+
   var m = new google.maps.Marker({
     map: map,
     animation: google.maps.Animation.DROP,
     title: pin.name,
-    position: new google.maps.LatLng(pin.lat, pin.long),
+    position: new google.maps.LatLng(pin.lat + (b1 * r2), pin.lng + (b2 * r3)),
     html: "<p><strong>"+ pin.message +"</strong></p><br/><strong><i> - "+ pin.name +"</i></strong></footer>"
   });
   google.maps.event.addListener(m, 'click', (function(m) {
@@ -227,7 +250,7 @@ function validate(event){
       geocoder.geocode({"address": address}, function(res, status){
         if(status === google.maps.GeocoderStatus.OK){
           pin.lat = res[0].geometry.location.Xa;
-          pin.long = res[0].geometry.location.Ya;
+          pin.lng = res[0].geometry.location.Ya;
         }
         else {
           return false
@@ -236,7 +259,7 @@ function validate(event){
       });
     }
     pin.lat = lat.val();
-    pin.long = lng.val();
+    pin.lng = lng.val();
 
     pin.recaptcha_challenge_field = Recaptcha.get_challenge()
     pin.recaptcha_response_field = Recaptcha.get_response()
@@ -247,7 +270,7 @@ function validate(event){
       success: function() {
         $("#form").slideUp();
         placePin(pin, event.data.map, event.data.info_window);
-        event.data.map.panTo(new google.maps.LatLng(pin.lat, pin.long));
+        event.data.map.panTo(new google.maps.LatLng(pin.lat, pin.lng));
         Recaptcha.destroy()
       },
       error: function(fail) {
@@ -262,10 +285,12 @@ function validate(event){
 //
 // MOverlay
 //
-function MOverlay(bounds, image, map, difficulty) {
+function MOverlay(bounds, image, map, difficulty, opts) {
 
   this.ratio = 160 / 212;
   this.difficulty = difficulty || 11;
+
+  this.opts = opts;
 
   // Now initialize all properties.
   this.bounds_ = bounds;
@@ -280,6 +305,7 @@ function MOverlay(bounds, image, map, difficulty) {
 
   // Explicitly call setMap on this overlay
   this.setMap(map);
+  this.remove();
 }
 
 MOverlay.prototype = new google.maps.OverlayView();
@@ -313,7 +339,7 @@ MOverlay.prototype.onAdd = function() {
   var panes = this.getPanes();
   panes.overlayImage.appendChild(this.div_);
 
-  google.maps.event.trigger(this.map_, 'added_cat', div);
+  google.maps.event.trigger(this.map_, 'added_cat', div, this.opts);
 }
 
 function sigmoid(t) {
@@ -349,8 +375,8 @@ MOverlay.prototype.draw = function() {
 
 
 MOverlay.prototype.remove = function() {
-  if (this.div_ && this.div_.parentNode) {
-    this.div_.parentNode.removeChild(this.div_);
+  if (this.div_) {
+    $(this.div_).remove();
     this.div_ = null;
   }
 }

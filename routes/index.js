@@ -31,7 +31,7 @@ var PinSchema = new Schema({
     name: String
   , message: String
   , lat: Number
-  , long: Number
+  , lng: Number
 });
 
 var EggLocationSchema = new Schema({
@@ -151,7 +151,7 @@ exports.index_submit = function(req, res){
       check(form.location !== "", "Location field must not be empty");
       check(form.message !== "", "Message must not be empty");
       check(!!form.lat, "Missing latitude");
-      check(!!form.long, "Missing longitude");
+      check(!!form.lng, "Missing longitude");
 
       if (hasErr) {
         res.status(500);
@@ -161,14 +161,14 @@ exports.index_submit = function(req, res){
       var pin = new Pin({
         name: form.name,
         lat: form.lat,
-        long: form.long,
+        lng: form.lng,
         message: form.message
       });
 
       pin.save();
 
       res.cookie('unitedMarker', pin._id, {expires: null, path: '/'});
-      res.render('done', { title: title, err: null });
+      return res.json({});
     }
     else {
       res.status(500);
