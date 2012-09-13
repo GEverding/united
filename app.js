@@ -40,6 +40,7 @@ app.get('/pins', routes.pins);
 app.post('/', routes.index_submit);
 app.post('/found', routes.found);
 app.get('/found', routes.claimed);
+app.get('/isNear', routes.isNear);
 
 app.listen(5010, function(){
   console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);

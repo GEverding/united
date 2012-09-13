@@ -34,8 +34,17 @@ var PinSchema = new Schema({
   , long: Number
 });
 
+var EggLocationSchema = new Schema({
+    location: {
+      type: [Number],
+      index: 2d
+    }
+  , egg: ObjectId
+})
+
 var Pin = mongoose.model('Pin', PinSchema);
 var Egg = mongoose.model('Egg', EggSchema);
+var EggLoc = mongoose.model('EggLoc', EggLocationSchema);
 
 exports.pins = function(req, res){
   var formatter = new ArrayFormatter();
@@ -171,3 +180,29 @@ exports.index_submit = function(req, res){
 
 
 };
+
+exports.isNear = function(req, res){
+  // Assuming req.body will have to variables
+  //   - lat
+  //   - lng
+  var body = req.body;
+  // query requires form to be in y, x form for some reason
+  EggLoc.findOne(
+    {
+      loc: {
+        $near: [body.lng, body.lat],
+        $maxDistance: 5
+      }
+    },
+    function(err, loc){
+      var near = !!loc;
+      console.log(loc);
+      if(near){
+        return res.json({msg: "close"})
+      }
+      else
+        return res.json({msg: "not close"})
+
+
+  })
+}
