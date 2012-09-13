@@ -46,8 +46,8 @@ function placeOverlayAt(opts) {
   var lat = opts.lat;
   var lng = opts.lng;
   var eggId = opts.eggId;
-  var scale = opts.scale || 1;
-  var difficulty = opts.difficulty || 11;
+  var scale = opts.scale || 0.2;
+  var difficulty = opts.difficulty || 12;
 
   var hw = 0.004 * scale;
   var hh = 0.0031 * scale;
@@ -142,19 +142,19 @@ function initialize() {
   var map = new google.maps.Map(document.getElementById("map_canvas"), map_options);
 
   var overlays = [
-    { map: map, lat: 29.975309, lng: 31.137751, eggId: 'a', difficulty: 10,
+    { map: map, lat: 29.975309, lng: 31.137751, eggId: 'a', difficulty: 12,
       message: "The original Monstercat."
     },
-    { map: map, lat: 61.502224, lng: 23.71985, eggId: 'b', difficulty: 9,
+    { map: map, lat: 61.502224, lng: 23.71985, eggId: 'b', difficulty: 12,
       message: "Oldest operational Sauna in Finland!"
     },
-    { map: map, lat: 35.50936, lng: -105.918694, eggId: 'c', difficulty: 9,
+    { map: map, lat: 35.50936, lng: -105.918694, eggId: 'c', difficulty: 12,
       message: ""
     },
-    { map: map, lat: 27.9856, lng: 86.9233, eggId: 'd', difficulty: 10,
+    { map: map, lat: 27.9856, lng: 86.9233, eggId: 'd', difficulty: 12,
       message: "#OperationDethrone"
     },
-    { map: map, lat: -19.39, lng: 46.64, eggId: 'e', difficulty: 9,
+    { map: map, lat: -19.39, lng: 46.64, eggId: 'e', difficulty: 12,
       message: "You have found the secret Monstercat. SHUT. DOWN. EVERYTHING.",
       scale: 8
     }
