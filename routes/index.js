@@ -40,13 +40,35 @@ var EggLocationSchema = new Schema({
       type: [Number],
       index: '2d'
     }
-  , egg: String
+  , eggId: String
+  , scale: Number
+  , difficulty: Number
   , message: String
 });
 
 var Pin = mongoose.model('Pin', PinSchema);
 var Egg = mongoose.model('Egg', EggSchema);
 var EggLoc = mongoose.model('EggLoc', EggLocationSchema);
+
+var allEggs = [
+  { location: [31.137751,29.975309], eggId: 'a', difficulty: 12,
+    message: "The original Monstercat."
+  },
+  { location: [23.71985,61.502224], eggId: 'b', difficulty: 12,
+    message: "Oldest operational Sauna in Finland!"
+  },
+  { location: [-105.918694,35.50936], eggId: 'c', difficulty: 12,
+    message: ""
+  },
+  { location: [86.9233,27.9856], eggId: 'd', difficulty: 12,
+    message: "#OperationDethrone"
+  },
+  { location: [46.64,-19.39], eggId: 'e', difficulty: 12,
+    message: "You have found the secret Monstercat. SHUT. DOWN. EVERYTHING.",
+    scale: 8
+  }
+];
+
 
 exports.pins = function(req, res){
   var formatter = new ArrayFormatter();
@@ -200,14 +222,13 @@ exports.isNear = function(req, res){
     if (loc) {
       return res.json({
           message: loc.message
-        , lat: loc.location[
+        , lat: loc.location[1]
+        , lng: loc.location[0]
+        , eggId: loc.eggId
       });
+    } else {
+      res.status(404);
+      return res.json({});
     }
-    var near = !!loc;
-    if(near){
-      return res.json();
-    }
-    else
-      return res.json({msg: "not close"});
   });
 };
