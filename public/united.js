@@ -56,7 +56,7 @@ function placeOverlayAt(opts) {
   var bounds = new google.maps.LatLngBounds(swBound, neBound);
 
   var srcImage = '/img/monstercat_findme.png';
-  overlay = new MOverlay(bounds, srcImage, map, difficulty, opts);
+  var overlay = new MOverlay(bounds, srcImage, map, difficulty, opts);
 
   function on(evt, cb) {
     google.maps.event.addListener(map, evt, cb);
@@ -305,6 +305,7 @@ function MOverlay(bounds, image, map, difficulty, opts) {
 
   // Explicitly call setMap on this overlay
   this.setMap(map);
+  this.remove();
 }
 
 MOverlay.prototype = new google.maps.OverlayView();
@@ -374,8 +375,8 @@ MOverlay.prototype.draw = function() {
 
 
 MOverlay.prototype.remove = function() {
-  if (this.div_ && this.div_.parentNode) {
-    this.div_.parentNode.removeChild(this.div_);
+  if (this.div_) {
+    $(this.div_).remove();
     this.div_ = null;
   }
 }
