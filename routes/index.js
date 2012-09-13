@@ -1,3 +1,4 @@
+/*jshint laxcomma:true*/
 
 /*
  * GET home page.
@@ -37,10 +38,11 @@ var PinSchema = new Schema({
 var EggLocationSchema = new Schema({
     location: {
       type: [Number],
-      index: 2d
+      index: '2d'
     }
-  , egg: ObjectId
-})
+  , egg: String
+  , message: String
+});
 
 var Pin = mongoose.model('Pin', PinSchema);
 var Egg = mongoose.model('Egg', EggSchema);
@@ -142,10 +144,10 @@ exports.index_submit = function(req, res){
       var hasErr = false;
       var err = null;
 
-      function check(cond, newErr){
+      var check = function (cond, newErr){
         hasErr = !cond || hasErr;
         err = err || (!cond? newErr : null);
-      }
+      };
 
       check(form.name !== "", "Name field must not be empty");
       check(form.location !== "", "Location field must not be empty");
@@ -186,23 +188,26 @@ exports.isNear = function(req, res){
   //   - lat
   //   - lng
   var body = req.body;
+  var q = {
+    loc: {
+      $near: [body.lng, body.lat],
+      $maxDistance: 5
+    }
+  };
+
   // query requires form to be in y, x form for some reason
-  EggLoc.findOne(
-    {
-      loc: {
-        $near: [body.lng, body.lat],
-        $maxDistance: 5
-      }
-    },
-    function(err, loc){
-      var near = !!loc;
-      console.log(loc);
-      if(near){
-        return res.json({msg: "close"})
-      }
-      else
-        return res.json({msg: "not close"})
-
-
-  })
-}
+  EggLoc.findOne(q, function(err, loc){
+    if (loc) {
+      return res.json({
+          message: loc.message
+        , lat: loc.location[
+      });
+    }
+    var near = !!loc;
+    if(near){
+      return res.json();
+    }
+    else
+      return res.json({msg: "not close"});
+  });
+};
