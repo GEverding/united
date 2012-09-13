@@ -50,26 +50,6 @@ var Pin = mongoose.model('Pin', PinSchema);
 var Egg = mongoose.model('Egg', EggSchema);
 var EggLoc = mongoose.model('EggLoc', EggLocationSchema);
 
-var allEggs = [
-  { location: [31.137751,29.975309], eggId: 'a', difficulty: 12,
-    message: "The original Monstercat."
-  },
-  { location: [23.71985,61.502224], eggId: 'b', difficulty: 12,
-    message: "Oldest operational Sauna in Finland!"
-  },
-  { location: [-105.918694,35.50936], eggId: 'c', difficulty: 12,
-    message: ""
-  },
-  { location: [86.9233,27.9856], eggId: 'd', difficulty: 12,
-    message: "#OperationDethrone"
-  },
-  { location: [46.64,-19.39], eggId: 'e', difficulty: 12,
-    message: "You have found the secret Monstercat. SHUT. DOWN. EVERYTHING.",
-    scale: 8
-  }
-];
-
-
 exports.pins = function(req, res){
   var formatter = new ArrayFormatter();
   var gzipper   = zlib.createGzip();
@@ -126,7 +106,6 @@ exports.found = function(req, res){
   var form = req.body;
 
   Egg.findOne({ eggId: form.eggId }, function(err, doc){
-    console.log(err, doc);
     var alreadyFound = !!doc;
     if (alreadyFound) {
       res.status(500);
@@ -151,7 +130,6 @@ exports.claimed = function(req, res) {
 };
 
 exports.index_submit = function(req, res){
-  console.log(req.body);
   var data = {
     remoteip:  req.connection.remoteAddress,
     challenge: req.body.recaptcha_challenge_field,
@@ -209,11 +187,11 @@ exports.isNear = function(req, res){
   // Assuming req.body will have to variables
   //   - lat
   //   - lng
-  var body = req.body;
+  var body = req.query;
   var q = {
-    loc: {
-      $near: [body.lng, body.lat],
-      $maxDistance: 5
+    location: {
+      $near: [+body.lng, +body.lat],
+      $maxDistance: 0.8
     }
   };
 
@@ -225,6 +203,8 @@ exports.isNear = function(req, res){
         , lat: loc.location[1]
         , lng: loc.location[0]
         , eggId: loc.eggId
+        , scale: loc.scale
+        , difficulty: loc.difficulty
       });
     } else {
       res.status(404);

@@ -41,8 +41,7 @@ function successCallback(position, cb) {
     cb(initialize());
 }
 
-function placeOverlayAt(opts) {
-  var map = opts.map;
+function placeOverlayAt(map, opts) {
   var lat = opts.lat;
   var lng = opts.lng;
   var eggId = opts.eggId;
@@ -141,36 +140,6 @@ function initialize() {
 
   var map = new google.maps.Map(document.getElementById("map_canvas"), map_options);
 
-  var overlays = [
-    { map: map, lat: 29.975309, lng: 31.137751, eggId: 'a', difficulty: 12,
-      message: "The original Monstercat."
-    },
-    { map: map, lat: 61.502224, lng: 23.71985, eggId: 'b', difficulty: 12,
-      message: "Oldest operational Sauna in Finland!"
-    },
-    { map: map, lat: 35.50936, lng: -105.918694, eggId: 'c', difficulty: 12,
-      message: ""
-    },
-    { map: map, lat: 27.9856, lng: 86.9233, eggId: 'd', difficulty: 12,
-      message: "#OperationDethrone"
-    },
-    { map: map, lat: -19.39, lng: 46.64, eggId: 'e', difficulty: 12,
-      message: "You have found the secret Monstercat. SHUT. DOWN. EVERYTHING.",
-      scale: 8
-    }
-  ];
-
-  $.ajax({
-    type: "GET",
-    url: "/found",
-    success: function(claimed){
-      var nonClaimedOverlays = _(overlays).filter(function(overlay){
-        return !_(claimed).include(overlay.eggId);
-      });
-      _(nonClaimedOverlays).each(placeOverlayAt);
-    }
-  });
-
   var info_window = new google.maps.InfoWindow({
       content: 'loading'
   });
@@ -192,6 +161,45 @@ function initialize() {
       }
     }
   });
+
+
+  // set up egg check handlers
+  var on = function (evt, cb) {
+    google.maps.event.addListener(map, evt, cb);
+  };
+
+  var eggs = {};
+
+  var askServerIfNear = function(pos, cb) {
+    $.ajax({
+      type: "GET",
+      url: "/isNear",
+      data: {
+        lat: pos.lat(),
+        lng: pos.lng()
+      },
+      success: cb
+    });
+  };
+
+  var askServerIfNearT = _.throttle(askServerIfNear, 500);
+
+  var isEggNear = function() {
+    var zoom = map.getZoom();
+    var center = map.getCenter();
+
+    if (zoom > 8) {
+      askServerIfNearT(center, function(egg){
+        if (eggs[egg.eggId]) return;
+        eggs[egg.eggId] = egg;
+        placeOverlayAt(map, egg);
+      });
+    }
+  };
+
+  on('zoom_changed', isEggNear);
+  on('center_changed', isEggNear);
+
   return { map: map, info_window: info_window };
 }
 
