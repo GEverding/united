@@ -104,9 +104,9 @@ function placeOverlayAt(map, opts) {
 
 function initialize() {
   geocoder = new google.maps.Geocoder();
-  var lat = 39.49;
-  var lng = -99.62;
-  var zoom = 4;
+  var lat = 40;
+  var lng = 0;
+  var zoom = 3;
 
   if (pin.lat !== null && pin.lng !== null) {
     lat = pin.lat;
