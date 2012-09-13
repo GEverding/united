@@ -112,10 +112,21 @@ exports.found = function(req, res){
       return res.json({ err: "already found :(", err_code: "already_found" });
     }
 
-    var egg = new Egg(form);
-    egg.save();
+    EggLoc.findOne({ eggId: form.eggId }, function(err, eggLoc){
+      if (err || !eggLoc)
+        return res.json({ message: "Invalid egg" });
 
-    return res.json({ message: "Congrats!" });
+      if (""+form.lat !== ""+eggLoc.location[1] ||
+          ""+form.lng !== ""+eggLoc.location[0]) {
+        return res.json({ message: "Nice try :)" });
+      }
+
+      var egg = new Egg(form);
+      egg.save();
+
+      return res.json({ message: "Congrats!" });
+    });
+
   });
 };
 

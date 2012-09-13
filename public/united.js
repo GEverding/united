@@ -106,6 +106,8 @@ function placeOverlayAt(map, opts) {
       data: {
         name: name,
         email: email,
+        lat: lat,
+        lng: lng,
         eggId: opts.eggId,
         claimedAt: new Date()
       },
