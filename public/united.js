@@ -13,27 +13,7 @@ var pin = {
     lng: null
 };
 
-function requestPosition(cb) {
-    if (nav == null) {
-        nav = window.navigator;
-    }
-    if (nav != null) {
-        var geoloc = nav.geolocation;
-        if (geoloc != null) {
-            geoloc.getCurrentPosition(function(position){
-              successCallback(position, cb);
-            }, function(error){
-              successCallback(null, cb);
-            });
-        }
-    } else {
-      successCallback(null, cb);
-    }
-}
-
-
-
-function successCallback(position, cb) {
+function initMap(position, cb) {
     if (position !== null) {
       pin.lat = position.coords.latitude;
       pin.lng = position.coords.longitude;

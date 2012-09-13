@@ -30,7 +30,7 @@ script
         $("#form").hide();
       }
 
-      requestPosition(function(obj){
+      initMap(null, function(obj){
         $("#submit").on("click", {
           map: obj.map,
           info_window: obj.info_window
