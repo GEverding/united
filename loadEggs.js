@@ -8,7 +8,7 @@ var locations = [
 	[86.9233 ,27.9856],
 	[46.64,-19.39]
 ]
-
+db.createCollection("posts", {capped:true, size: 5242880, max: 50 })
 db.EggLoc.ensureIndex({loc: '2d'})
 
 for (var i = 0; i < locations.length; i++){

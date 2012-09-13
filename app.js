@@ -10,7 +10,7 @@ var express = require('express')
   , recaptcha = require('recaptcha').Recaptcha;
 
 var app = module.exports = express.createServer();
-
+var io = module.exports = require('socket.io').listen(app);
 
 // Configuration
 
@@ -34,6 +34,37 @@ app.configure('production', function(){
 });
 
 mongoose.connect("mongodb://localhost/test", { auto_reconnect: true });
+
+io.sockets.on('connection', function(socket){
+  var feed = null;
+  routes.GetFeed(function(err, feed_){
+    if(err){
+      console.log(err);
+      return null;
+    }
+    else
+      feed = feed_;
+      //console.log(feed)
+      socket.emit('new', {feed: feed_});
+  })
+  console.log("Feed: ", feed);
+
+
+  socket.on('newPost', function(data){
+    var update = routes.UpdateFeed(function(err, update_){
+      if(err){
+        console.log(err);
+        return null;
+      }
+      else
+        update = update_;
+        console.log(update);
+        io.sockets.emit('feedUpdate', {update: update})
+        return update_;
+    });
+    ;
+  })
+})
 
 app.get('/', routes.index);
 app.get('/pins', routes.pins);

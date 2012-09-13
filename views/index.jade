@@ -26,8 +26,39 @@ script
 
       var map, info_window;
 
+      // change for production
+      socket = io.connect('http://localhost:5010');
+
+      socket.on('feedUpdate', function(data){
+        console.log(data);
+        $(".post").last().remove();
+        var html = '<div class="post" style="display: none;"><span id="post"'+ 1 + 'class="msg"><p>' + data.update[0].message + '</p></span><span class="msgname"> &nbsp;&nbsp; &mdash; ' + data.update[0].name + '</span></div>';
+        $("#feed").prepend(html);
+        $(".post").slideDown();
+      })
+      socket.on('new', function(data){
+        console.log("received new");
+        console.log(data);
+        console.log(Date.now())
+        console.log(new Date(data.feed[0].date).getTime());
+        console.log(data.feed[0].date)
+        for(var i = 0; i < data.feed.length; i ++){
+
+          var diff = Date.now() - new Date(data.feed[0].date).getTime()
+          console.log(Math.round((diff/1000)/60));
+          var html = '<div class="post" style="display: none;"><span id="post"'+ 1 + 'class="msg"><p>' + data.feed[i].message + '</p></span><span class="msgname"> &nbsp;&nbsp; &mdash; ' + data.feed[i].name + '</span><span class="timestamp"> &nbsp;&nbsp ' + Math.round((diff/1000)/60) + ' minutes ago</span></div>';
+          $("#feed").append(html);
+        }
+        $(".post").show('slow');
+
+
+
+      })
+
       if( $.cookie('unitedMarker') !== null ){
         $("#form").hide();
+        $("#activity").show();
+        $("#feed").height(600);
       }
 
       requestPosition(function(obj){
@@ -120,36 +151,42 @@ br
 
 #main
   #map_canvas(style="height: 100%; width: 100%;")
+  .rightform
+    #form
+      .alert#form-err(style="display: none;")
+        button.close(type="button", data-dismiss="alert") x
+      form.form-horizontal(method="", enctype="multipart/form-data")
+        fieldset
+          .control-group
+            label.control-label(for="name") Name
+              em *
+            .controls
+              input#name(type="text", name="name", placeholder="Enter Name...")
+          .control-group
+            label.control-label(for="location") Location
+              em *
+            .controls
+              input#location(type="text", name="location", autocomplete="off", placeholder="Enter Your Location...")
+              span.help-block
+                | You <i>must</i> choose a location from the dropdown
+          .control-group
+            label.control-label(for="state") Message
+              em *
+            .controls
+              textarea#msg(rows="3")
+              span.help-block 140 Character Limit
 
-  #form.rightform
-    .alert#form-err(style="display: none;")
-      button.close(type="button", data-dismiss="alert") x
+          input#lat(type="hidden", name="lat")
+          input#lng(type="hidden", name="lng")
 
-    form.form-horizontal(method="", enctype="multipart/form-data")
-      fieldset
-        .control-group
-          label.control-label(for="name") Name
-            em *
-          .controls
-            input#name(type="text", name="name", placeholder="Enter Name...")
-        .control-group
-          label.control-label(for="location") Location
-            em *
-          .controls
-            input#location(type="text", name="location", autocomplete="off", placeholder="Enter Your Location...")
-            span.help-block
-              | You <i>must</i> choose a location from the dropdown
-        .control-group
-          label.control-label(for="state") Message
-            em *
-          .controls
-            textarea#msg(rows="3")
-            span.help-block 140 Character Limit
+          #recaptcha
 
-        input#lat(type="hidden", name="lat")
-        input#lng(type="hidden", name="lng")
+        fieldset.pull-right(style="padding-right: 50px; margin-top: 3px;")
+          button#submit.btn.btn-small(type="button") Submit
 
-        #recaptcha
 
-      fieldset.pull-right(style="padding-right: 50px;")
-        button#submit.btn.btn-small(type="button") Submit
+
+    #feed.rightfeed
+      h4#activity(style="display:none;") Activity Feed
+
+

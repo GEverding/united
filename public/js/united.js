@@ -3,6 +3,7 @@ var united = united || {};
 
 var nav = null;
 var geocoder = null;
+var socket = null;
 var pin = {
     name: "",
     city: "",
@@ -269,9 +270,15 @@ function validate(event){
       data: pin,
       success: function() {
         $("#form").slideUp();
+        $("#feed").height(600);
+        $("#activity").show();
+        console.log("new Post fired");
+        socket.emit('newPost', {});
         placePin(pin, event.data.map, event.data.info_window);
+
         event.data.map.panTo(new google.maps.LatLng(pin.lat, pin.lng));
-        Recaptcha.destroy()
+        Recaptcha.destroy();
+
       },
       error: function(fail) {
         var ret = JSON.parse(fail.responseText);
