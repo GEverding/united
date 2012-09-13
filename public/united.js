@@ -69,6 +69,7 @@ function placeOverlayAt(opts) {
 
   function showOrHide() {
     var center = map.getCenter();
+
     if (shouldShow()) {
       overlay.show();
     } else {
@@ -78,9 +79,9 @@ function placeOverlayAt(opts) {
 
   var $modal = $("#catModal");
 
-
   on('zoom_changed', showOrHide);
   on('center_changed', showOrHide);
+
   on('added_cat', function(div, opts_){
     $(div).click(function(){
       $modal.modal();
@@ -195,12 +196,16 @@ function initialize() {
 }
 
 function placePin(pin, map, info_window){
-  var r = Math.random() / 18;
+  var b1 = Math.random() / 18;
+  var b2 = Math.random() / 18;
+  var r2 = Math.random() > 0.5 ? 1 : -1;
+  var r3 = Math.random() > 0.5 ? 1 : -1;
+
   var m = new google.maps.Marker({
     map: map,
     animation: google.maps.Animation.DROP,
     title: pin.name,
-    position: new google.maps.LatLng(pin.lat + r, pin.lng + r),
+    position: new google.maps.LatLng(pin.lat + (b1 * r2), pin.lng + (b2 * r3)),
     html: "<p><strong>"+ pin.message +"</strong></p><br/><strong><i> - "+ pin.name +"</i></strong></footer>"
   });
   google.maps.event.addListener(m, 'click', (function(m) {
