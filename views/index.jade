@@ -61,7 +61,7 @@ script
         $("#feed").height(600);
       }
 
-      requestPosition(function(obj){
+      initMap(null, function(obj){
         $("#submit").on("click", {
           map: obj.map,
           info_window: obj.info_window

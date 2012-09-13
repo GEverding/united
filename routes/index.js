@@ -1,3 +1,4 @@
+/*jshint laxcomma:true*/
 
 /*
  * GET home page.
@@ -39,8 +40,11 @@ var EggLocationSchema = new Schema({
       type: [Number],
       index: '2d'
     }
-  , egg: ObjectId
-})
+  , eggId: String
+  , scale: Number
+  , difficulty: Number
+  , message: String
+});
 
 var PostSchema = new Schema({
     name: String
@@ -114,17 +118,27 @@ exports.found = function(req, res){
   var form = req.body;
 
   Egg.findOne({ eggId: form.eggId }, function(err, doc){
-    console.log(err, doc);
     var alreadyFound = !!doc;
     if (alreadyFound) {
       res.status(500);
       return res.json({ err: "already found :(", err_code: "already_found" });
     }
 
-    var egg = new Egg(form);
-    egg.save();
+    EggLoc.findOne({ eggId: form.eggId }, function(err, eggLoc){
+      if (err || !eggLoc)
+        return res.json({ message: "Invalid egg" });
 
-    return res.json({ message: "Congrats!" });
+      if (""+form.lat !== ""+eggLoc.location[1] ||
+          ""+form.lng !== ""+eggLoc.location[0]) {
+        return res.json({ message: "Nice try :)" });
+      }
+
+      var egg = new Egg(form);
+      egg.save();
+
+      return res.json({ message: "Congrats!" });
+    });
+
   });
 };
 
@@ -139,7 +153,6 @@ exports.claimed = function(req, res) {
 };
 
 exports.index_submit = function(req, res){
-  console.log(req.body);
   var data = {
     remoteip:  req.connection.remoteAddress,
     challenge: req.body.recaptcha_challenge_field,
@@ -154,10 +167,10 @@ exports.index_submit = function(req, res){
       var hasErr = false;
       var err = null;
 
-      function check(cond, newErr){
+      var check = function (cond, newErr){
         hasErr = !cond || hasErr;
         err = err || (!cond? newErr : null);
-      }
+      };
 
       check(form.name !== "", "Name field must not be empty");
       check(form.location !== "", "Location field must not be empty");
@@ -204,32 +217,36 @@ exports.isNear = function(req, res){
   // Assuming req.body will have to variables
   //   - lat
   //   - lng
-  var body = req.body;
+  var body = req.query;
+  var q = {
+    location: {
+      $near: [+body.lng, +body.lat],
+      $maxDistance: 0.8
+    }
+  };
+
   // query requires form to be in y, x form for some reason
-  EggLoc.findOne(
-    {
-      loc: {
-        $near: [body.lng, body.lat],
-        $maxDistance: 5
-      }
-    },
-    function(err, loc){
-      var near = !!loc;
-      console.log(loc);
-      if(near){
-        return res.json({msg: "close"})
-      }
-      else
-        return res.json({msg: "not close"})
-
-
-  })
-}
+  EggLoc.findOne(q, function(err, loc){
+    if (loc) {
+      return res.json({
+          message: loc.message
+        , lat: loc.location[1]
+        , lng: loc.location[0]
+        , eggId: loc.eggId
+        , scale: loc.scale
+        , difficulty: loc.difficulty
+      });
+    } else {
+      res.status(404);
+      return res.json({});
+    }
+  });
+};
 
 exports.UpdateFeed = function(cb){
   return Post.find({}).sort("$natural", "descending").limit(1).exec(cb);
-}
+};
 
 exports.GetFeed = function(cb){
   Post.find({}).sort("$natural", "descending" ).limit(25).exec(cb);
-}
+};

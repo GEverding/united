@@ -14,27 +14,7 @@ var pin = {
     lng: null
 };
 
-function requestPosition(cb) {
-    if (nav == null) {
-        nav = window.navigator;
-    }
-    if (nav != null) {
-        var geoloc = nav.geolocation;
-        if (geoloc != null) {
-            geoloc.getCurrentPosition(function(position){
-              successCallback(position, cb);
-            }, function(error){
-              successCallback(null, cb);
-            });
-        }
-    } else {
-      successCallback(null, cb);
-    }
-}
-
-
-
-function successCallback(position, cb) {
+function initMap(position, cb) {
     if (position !== null) {
       pin.lat = position.coords.latitude;
       pin.lng = position.coords.longitude;
@@ -42,8 +22,7 @@ function successCallback(position, cb) {
     cb(initialize());
 }
 
-function placeOverlayAt(opts) {
-  var map = opts.map;
+function placeOverlayAt(map, opts) {
   var lat = opts.lat;
   var lng = opts.lng;
   var eggId = opts.eggId;
@@ -108,6 +87,8 @@ function placeOverlayAt(opts) {
       data: {
         name: name,
         email: email,
+        lat: lat,
+        lng: lng,
         eggId: opts.eggId,
         claimedAt: new Date()
       },
@@ -124,9 +105,9 @@ function placeOverlayAt(opts) {
 
 function initialize() {
   geocoder = new google.maps.Geocoder();
-  var lat = 39.49;
-  var lng = -99.62;
-  var zoom = 4;
+  var lat = 40;
+  var lng = 0;
+  var zoom = 3;
 
   if (pin.lat !== null && pin.lng !== null) {
     lat = pin.lat;
@@ -141,36 +122,6 @@ function initialize() {
   };
 
   var map = new google.maps.Map(document.getElementById("map_canvas"), map_options);
-
-  var overlays = [
-    { map: map, lat: 29.975309, lng: 31.137751, eggId: 'a', difficulty: 12,
-      message: "The original Monstercat."
-    },
-    { map: map, lat: 61.502224, lng: 23.71985, eggId: 'b', difficulty: 12,
-      message: "Oldest operational Sauna in Finland!"
-    },
-    { map: map, lat: 35.50936, lng: -105.918694, eggId: 'c', difficulty: 12,
-      message: ""
-    },
-    { map: map, lat: 27.9856, lng: 86.9233, eggId: 'd', difficulty: 12,
-      message: "#OperationDethrone"
-    },
-    { map: map, lat: -19.39, lng: 46.64, eggId: 'e', difficulty: 12,
-      message: "You have found the secret Monstercat. SHUT. DOWN. EVERYTHING.",
-      scale: 8
-    }
-  ];
-
-  $.ajax({
-    type: "GET",
-    url: "/found",
-    success: function(claimed){
-      var nonClaimedOverlays = _(overlays).filter(function(overlay){
-        return !_(claimed).include(overlay.eggId);
-      });
-      _(nonClaimedOverlays).each(placeOverlayAt);
-    }
-  });
 
   var info_window = new google.maps.InfoWindow({
       content: 'loading'
@@ -193,6 +144,45 @@ function initialize() {
       }
     }
   });
+
+
+  // set up egg check handlers
+  var on = function (evt, cb) {
+    google.maps.event.addListener(map, evt, cb);
+  };
+
+  var eggs = {};
+
+  var askServerIfNear = function(pos, cb) {
+    $.ajax({
+      type: "GET",
+      url: "/isNear",
+      data: {
+        lat: pos.lat(),
+        lng: pos.lng()
+      },
+      success: cb
+    });
+  };
+
+  var askServerIfNearT = _.throttle(askServerIfNear, 500);
+
+  var isEggNear = function() {
+    var zoom = map.getZoom();
+    var center = map.getCenter();
+
+    if (zoom > 8) {
+      askServerIfNearT(center, function(egg){
+        if (eggs[egg.eggId]) return;
+        eggs[egg.eggId] = egg;
+        placeOverlayAt(map, egg);
+      });
+    }
+  };
+
+  on('zoom_changed', isEggNear);
+  on('center_changed', isEggNear);
+
   return { map: map, info_window: info_window };
 }
 
