@@ -257,6 +257,7 @@ function validate(event){
 
     pin.recaptcha_challenge_field = Recaptcha.get_challenge();
     pin.recaptcha_response_field = Recaptcha.get_response();
+
     $.ajax({
       type: "POST",
       url: "",

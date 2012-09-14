@@ -30,25 +30,24 @@ script
       // change for production
       socket = io.connect('http://united.monstercat.com');
 
+      var numPosts = 0;
+
       socket.on('feedUpdate', function(data){
-        console.log(data);
-        $(".post").last().remove();
+        if (numPosts > 50)
+          $(".post").last().remove();
         var html = '<div class="post" style="display: none;"><span id="post"'+ 1 + 'class="msg"><p>' + data.update[0].message + '</p></span><span class="msgname"> &nbsp;&nbsp; &mdash; ' + data.update[0].name + '</span></div>';
         $("#feed").prepend(html);
+        numPosts++;
         $(".post").slideDown();
       })
-      socket.on('new', function(data){
-        console.log("received new");
-        console.log(data);
-        console.log(Date.now())
-        console.log(new Date(data.feed[0].date).getTime());
-        console.log(data.feed[0].date)
-        for(var i = 0; i < data.feed.length; i ++){
 
+      socket.on('new', function(data){
+        for(var i = 0; i < data.feed.length; i ++){
           var diff = Date.now() - new Date(data.feed[0].date).getTime()
           console.log(Math.round((diff/1000)/60));
           var html = '<div class="post" style="display: none;"><span id="post"'+ 1 + 'class="msg"><p>' + data.feed[i].message + '</p></span><span class="msgname"> &nbsp;&nbsp; &mdash; ' + data.feed[i].name + '</span><span class="timestamp"> &nbsp;&nbsp ' + Math.round((diff/1000)/60) + ' minutes ago</span></div>';
           $("#feed").append(html);
+          numPosts++;
         }
         $(".post").show('slow');
 
