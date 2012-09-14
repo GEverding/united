@@ -175,6 +175,8 @@ exports.index_submit = function(req, res){
       check(form.name !== "", "Name field must not be empty");
       check(form.location !== "", "Location field must not be empty");
       check(form.message !== "", "Message must not be empty");
+      if (form.message)
+        check(form.message.length <= 140, "Message too long");
       check(!!form.lat, "Missing latitude");
       check(!!form.lng, "Missing longitude");
 
