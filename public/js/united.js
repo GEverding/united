@@ -3,7 +3,6 @@ var united = united || {};
 
 var nav = null;
 var geocoder = null;
-var socket = null;
 var pin = {
     name: "",
     city: "",
@@ -14,12 +13,12 @@ var pin = {
     lng: null
 };
 
-function initMap(position, cb) {
+function initMap(position, socket, cb) {
     if (position !== null) {
       pin.lat = position.coords.latitude;
       pin.lng = position.coords.longitude;
     }
-    cb(initialize());
+    cb(initialize(socket));
 }
 
 function placeOverlayAt(map, opts) {
@@ -103,7 +102,7 @@ function placeOverlayAt(map, opts) {
   });
 }
 
-function initialize() {
+function initialize(socket) {
   geocoder = new google.maps.Geocoder();
   var lat = 40;
   var lng = 0;
@@ -143,6 +142,7 @@ function initialize() {
         placePin(pin, map, info_window);
       }
     }
+
   });
 
 
@@ -210,7 +210,7 @@ function placePin(pin, map, info_window){
   })(m));
 }
 
-function validate(event){
+function validate(event, socket){
     var input = null;
     var val = null;
     var err;

@@ -25,13 +25,6 @@ script
         }
       });
 
-      var map, info_window;
-
-      // change for production
-      socket = io.connect('http://united.monstercat.com');
-
-      var numPosts = 0;
-
       var postTemplate = function(message, name, dt) {
           var diff = Date.now() - new Date(dt).getTime()
           return '<div class="post" style="display: none;"><span id="post"'+ 1 +
@@ -40,23 +33,6 @@ script
             '</span><span class="timestamp"> &nbsp;&nbsp ' + Math.round((diff/1000)/60) + ' minutes ago</span></div>';
       }
 
-      socket.on('feedUpdate', function(data){
-        if (numPosts > 50)
-          $(".post").last().remove();
-        var html = postTemplate(data.update[0].message, data.update[0].name, data.update[0].date);
-        $("#feed").prepend(html);
-        numPosts++;
-        $(".post").slideDown();
-      })
-
-      socket.on('new', function(data){
-        for(var i = 0; i < data.feed.length; i ++){
-          var html = postTemplate(data.feed[i].message, data.feed[i].name, data.feed[i].date);
-          $("#feed").append(html);
-          numPosts++;
-        }
-        $(".post").show('slow');
-      })
 
       if( $.cookie('unitedMarker') !== null ){
         $("#form").hide();
@@ -64,11 +40,41 @@ script
         $("#feed").height(600);
       }
 
-      initMap(null, function(obj){
+      var server = "htpp://localhost:5010"; //"http://united.monstercat.com"
+      // change for production
+      var socket = io.connect(server);
+
+      initMap(null, socket, function(obj){
+        var map = obj.map;
+        var info_window = obj.info_window;
+        var numPosts = 0;
+
+        socket.on('feedUpdate', function(data){
+          if (numPosts > 50)
+            $(".post").last().remove();
+          var html = postTemplate(data.update[0].message, data.update[0].name, data.update[0].date);
+          $("#feed").prepend(html);
+          numPosts++;
+          $(".post").slideDown();
+
+          placePin(data.update[0], map, info_window);
+        })
+
+        socket.on('new', function(data){
+          for(var i = 0; i < data.feed.length; i ++){
+            var html = postTemplate(data.feed[i].message, data.feed[i].name, data.feed[i].date);
+            $("#feed").append(html);
+            numPosts++;
+          }
+          $(".post").show('slow');
+        })
+
         $("#submit").on("click", {
           map: obj.map,
           info_window: obj.info_window
-        }, validate);
+        }, function(e){
+          validate(e, socket)
+        });
       });
 
       $("#location").typeahead({
@@ -166,7 +172,7 @@ br
             .controls
               input#name(type="text", name="name", placeholder="Enter Name...")
           .control-group
-            label.control-label(for="location") Location
+            label.control-label(for="location") City
               em *
             .controls
               input#location(type="text", name="location", autocomplete="off", placeholder="Enter Your Location...")
