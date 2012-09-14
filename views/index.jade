@@ -32,10 +32,18 @@ script
 
       var numPosts = 0;
 
+      var postTemplate = function(message, name, dt) {
+          var diff = Date.now() - new Date(dt).getTime()
+          return '<div class="post" style="display: none;"><span id="post"'+ 1 +
+            'class="msg"><p>' + message +
+            '</p></span><span class="msgname"> &nbsp;&nbsp; &mdash; ' + name +
+            '</span><span class="timestamp"> &nbsp;&nbsp ' + Math.round((diff/1000)/60) + ' minutes ago</span></div>';
+      }
+
       socket.on('feedUpdate', function(data){
         if (numPosts > 50)
           $(".post").last().remove();
-        var html = '<div class="post" style="display: none;"><span id="post"'+ 1 + 'class="msg"><p>' + data.update[0].message + '</p></span><span class="msgname"> &nbsp;&nbsp; &mdash; ' + data.update[0].name + '</span></div>';
+        var html = postTemplate(data.update[0].message, data.update[0].name, data.update[0].date);
         $("#feed").prepend(html);
         numPosts++;
         $(".post").slideDown();
@@ -43,16 +51,11 @@ script
 
       socket.on('new', function(data){
         for(var i = 0; i < data.feed.length; i ++){
-          var diff = Date.now() - new Date(data.feed[0].date).getTime()
-          console.log(Math.round((diff/1000)/60));
-          var html = '<div class="post" style="display: none;"><span id="post"'+ 1 + 'class="msg"><p>' + data.feed[i].message + '</p></span><span class="msgname"> &nbsp;&nbsp; &mdash; ' + data.feed[i].name + '</span><span class="timestamp"> &nbsp;&nbsp ' + Math.round((diff/1000)/60) + ' minutes ago</span></div>';
+          var html = postTemplate(data.feed[i].message, data.feed[i].name, data.feed[i].date);
           $("#feed").append(html);
           numPosts++;
         }
         $(".post").show('slow');
-
-
-
       })
 
       if( $.cookie('unitedMarker') !== null ){
@@ -184,9 +187,7 @@ br
         fieldset.pull-right(style="padding-right: 50px; margin-top: 3px;")
           button#submit.btn.btn-small(type="button") Submit
 
-
-
+    h4#activity(style="display:none;") Activity Feed
     #feed.rightfeed
-      h4#activity(style="display:none;") Activity Feed
 
 
