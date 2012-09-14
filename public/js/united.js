@@ -187,6 +187,8 @@ function initialize() {
 }
 
 function placePin(pin, map, info_window){
+  pin.lat = +pin.lat;
+  pin.lng = +pin.lng;
   var b1 = Math.random() / 18;
   var b2 = Math.random() / 18;
   var r2 = Math.random() > 0.5 ? 1 : -1;
@@ -199,11 +201,12 @@ function placePin(pin, map, info_window){
     position: new google.maps.LatLng(pin.lat + (b1 * r2), pin.lng + (b2 * r3)),
     html: "<p><strong>"+ pin.message +"</strong></p><br/><strong><i> - "+ pin.name +"</i></strong></footer>"
   });
+
   google.maps.event.addListener(m, 'click', (function(m) {
     return function(){
       info_window.setContent(m.html);
       info_window.open(map, m);
-    }
+    };
   })(m));
 }
 
@@ -252,8 +255,8 @@ function validate(event){
     pin.lat = lat.val();
     pin.lng = lng.val();
 
-    pin.recaptcha_challenge_field = Recaptcha.get_challenge()
-    pin.recaptcha_response_field = Recaptcha.get_response()
+    pin.recaptcha_challenge_field = Recaptcha.get_challenge();
+    pin.recaptcha_response_field = Recaptcha.get_response();
     $.ajax({
       type: "POST",
       url: "",
@@ -262,19 +265,23 @@ function validate(event){
         $("#form").slideUp();
         $("#feed").height(600);
         $("#activity").show();
-        console.log("new Post fired");
+        console.log(pin, event);
         socket.emit('newPost', {});
-        placePin(pin, event.data.map, event.data.info_window);
 
-        event.data.map.panTo(new google.maps.LatLng(pin.lat, pin.lng));
+        var map = event.data.map;
+
+        placePin(pin, map, event.data.info_window);
+
+        map.setZoom(7);
+        map.panTo(new google.maps.LatLng(pin.lat, pin.lng));
         Recaptcha.destroy();
 
       },
       error: function(fail) {
         var ret = JSON.parse(fail.responseText);
         Recaptcha.reload();
-        $("#form-err").show()
-        $("#form-err").append("<strong>Error!</strong> "+ ret.err)
+        $("#form-err").show();
+        $("#form-err").append("<strong>Error!</strong> "+ ret.err);
       }
     });
 }
