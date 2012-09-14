@@ -52,6 +52,8 @@ var PostSchema = new Schema({
   , date: {
       type: Date,
       default: Date.now()
+  , lat: String
+  , lng: String
   }
 })
 
@@ -188,7 +190,9 @@ exports.index_submit = function(req, res){
       var post = new Post({
         name: form.name,
         message: form.message,
-        date: Date.now()
+        date: Date.now(),
+        lat: form.lat,
+        lng: form.lng
       });
       post.save();
 
