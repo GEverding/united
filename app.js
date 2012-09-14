@@ -46,7 +46,7 @@ io.sockets.on('connection', function(socket){
       feed = feed_;
       //console.log(feed)
       socket.emit('new', {feed: feed_});
-  })
+  });
   console.log("Feed: ", feed);
 
 
@@ -59,12 +59,11 @@ io.sockets.on('connection', function(socket){
       else
         update = update_;
         console.log(update);
-        io.sockets.emit('feedUpdate', {update: update})
+        io.sockets.emit('feedUpdate', {update: update});
         return update_;
     });
-    ;
-  })
-})
+  });
+});
 
 app.get('/', routes.index);
 app.get('/pins', routes.pins);

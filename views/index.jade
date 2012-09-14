@@ -40,9 +40,8 @@ script
         $("#feed").height(600);
       }
 
-      var server = "htpp://localhost:5010"; //"http://united.monstercat.com"
       // change for production
-      var socket = io.connect(server);
+      var socket = io.connect("http://united.monstercat.com");
 
       initMap(null, socket, function(obj){
         var map = obj.map;
@@ -182,7 +181,7 @@ br
             label.control-label(for="state") Message
               em *
             .controls
-              textarea#msg(rows="3")
+              textarea#msg(rows="3", placeholder="Leave a meaningful message...")
               span.help-block 140 Character Limit
 
           input#lat(type="hidden", name="lat")
