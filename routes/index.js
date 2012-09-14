@@ -203,7 +203,7 @@ exports.index_submit = function(req, res){
 
       pin.save();
 
-      res.cookie('unitedMarker', pin._id, {expires: null, path: '/'});
+      res.cookie('monstercat', pin._id, {expires: null, path: '/'});
       return res.json({});
     }
     else {

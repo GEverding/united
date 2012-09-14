@@ -135,7 +135,7 @@ function initialize(socket) {
       var pins = data.results;
       for(var i = 0; i < pins.length; i++){
         var pin = pins[i];
-        var cookie = $.cookie("unitedMarker");
+        var cookie = $.cookie("monster");
         if( cookie === pin._id ){
           map.panTo(new google.maps.LatLng(pin.lat, pin.lng));
         }
