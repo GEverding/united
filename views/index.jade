@@ -28,7 +28,7 @@ script
       var map, info_window;
 
       // change for production
-      socket = io.connect('http://localhost:5010');
+      socket = io.connect('http://united.monstercat.com');
 
       socket.on('feedUpdate', function(data){
         console.log(data);
