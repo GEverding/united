@@ -271,8 +271,6 @@ function validate(event, socket){
 
         var map = event.data.map;
 
-        placePin(pin, map, event.data.info_window);
-
         map.setZoom(7);
         map.panTo(new google.maps.LatLng(pin.lat, pin.lng));
         Recaptcha.destroy();
