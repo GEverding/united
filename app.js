@@ -47,8 +47,6 @@ io.sockets.on('connection', function(socket){
       //console.log(feed)
       socket.emit('new', {feed: feed_});
   });
-  console.log("Feed: ", feed);
-
 
   socket.on('newPost', function(data){
     var update = routes.UpdateFeed(function(err, update_){
@@ -58,7 +56,6 @@ io.sockets.on('connection', function(socket){
       }
       else
         update = update_;
-        console.log(update);
         io.sockets.emit('feedUpdate', {update: update});
         return update_;
     });
