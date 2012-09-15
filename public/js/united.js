@@ -133,6 +133,7 @@ function initialize(socket) {
 
     success: function(data) {
       var pins = data.results;
+      $("#pincount").text(pins.length);
       for(var i = 0; i < pins.length; i++){
         var pin = pins[i];
         var cookie = $.cookie("monster");

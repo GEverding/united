@@ -48,11 +48,14 @@ script
         var info_window = obj.info_window;
         var numPosts = 0;
 
+        var $pincount = $("#pincount");
+
         socket.on('feedUpdate', function(data){
           if (numPosts > 50)
             $(".post").last().remove();
           var html = postTemplate(data.update[0].message, data.update[0].name, data.update[0].date);
           $("#feed").prepend(html);
+          $pincount.text(+$pincount.text()+1);
           numPosts++;
           $(".post").slideDown();
 
@@ -192,7 +195,11 @@ br
         fieldset.pull-right(style="padding-right: 50px; margin-top: 3px;")
           button#submit.btn.btn-small(type="button") Submit
 
-    h4#activity(style="display:none;") Activity Feed
+    h4#activity(style="display:none;")
+      | Activity Feed (
+      span#pincount
+      |  marks)
+
     #feed.rightfeed
 
 
