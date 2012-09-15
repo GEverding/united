@@ -86,7 +86,7 @@ exports.index = function(req, res){
       return !maybeEgg ? '' : maybeEgg.name;
     }
 
-    var eggIds = ['a', 'b', 'c', 'd', 'e'];
+    var eggIds = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'];
 
     var cats = _(eggIds).map(function(eggId){
       var d = {};
