@@ -33,6 +33,10 @@ var PinSchema = new Schema({
   , message: String
   , lat: Number
   , lng: Number
+  , date: {
+      type: Date,
+      default: Date.now()
+  }
 });
 
 var EggLocationSchema = new Schema({
@@ -46,23 +50,9 @@ var EggLocationSchema = new Schema({
   , message: String
 });
 
-var PostSchema = new Schema({
-    name: String
-  , message: String
-  , date: {
-      type: Date,
-      default: Date.now()
-  , lat: String
-  , lng: String
-  }
-})
-
-
-
 var Pin = mongoose.model('Pin', PinSchema);
 var Egg = mongoose.model('Egg', EggSchema);
 var EggLoc = mongoose.model('EggLoc', EggLocationSchema);
-var Post = mongoose.model('Post', PostSchema);
 
 exports.pins = function(req, res){
   var formatter = new ArrayFormatter();
@@ -187,17 +177,9 @@ exports.index_submit = function(req, res){
         return res.json({err: err });
       }
 
-      var post = new Post({
-        name: form.name,
-        message: form.message,
-        date: Date.now(),
-        lat: form.lat,
-        lng: form.lng
-      });
-      post.save();
-
       var pin = new Pin({
         name: form.name,
+        date: Date.now(),
         lat: form.lat,
         lng: form.lng,
         message: form.message
@@ -250,9 +232,9 @@ exports.isNear = function(req, res){
 };
 
 exports.UpdateFeed = function(cb){
-  return Post.find({}).sort("$natural", "descending").limit(1).exec(cb);
+  return Pin.find({}).sort("$natural", "descending").limit(1).exec(cb);
 };
 
 exports.GetFeed = function(cb){
-  Post.find({}).sort("$natural", "descending" ).limit(25).exec(cb);
+  Pin.find({}).sort("$natural", "descending" ).limit(25).exec(cb);
 };
