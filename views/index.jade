@@ -133,7 +133,7 @@ script
 
 br
 
-#catModal.modal.hide.fade(role="dialog", aria-labelledby="myModalLable")
+#catModal.modal.fade(style="display:none;", role="dialog", aria-labelledby="myModalLable")
   .modal-header
     button.close(type="button", data-dismiss="modal", aria-hidden="true")
       | &times;
@@ -141,8 +141,8 @@ br
     .modal-body
       p#modalMsg
       p
-        | You have won a Monstercat shirt and bag! Enter your email and name so we
-        | can contact you for your info.
+        | You have found a Monstercat! Enter your email and name to verify that it hasn't already been claimed.
+        | Your name will appear at the top and we will contact you for your info if you have won.
 
     form.form-horizontal
       input#modalEggId(type="hidden", value="")
@@ -201,5 +201,6 @@ br
       |  marks)
 
     #feed.rightfeed
+
 
 
