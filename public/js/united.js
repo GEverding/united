@@ -173,7 +173,7 @@ function initialize(socket) {
     });
   };
 
-  var askServerIfNearT = _.throttle(askServerIfNear, 500);
+  var askServerIfNearT = _.throttle(askServerIfNear, 1000);
 
   var isEggNear = function() {
     var zoom = map.getZoom();
