@@ -58,7 +58,6 @@ exports.pins = function(req, res){
   var formatter = new ArrayFormatter();
 
   res.writeHead(200, {
-    'content-encoding': 'gzip',
     'content-type': 'application/json'
   });
 
