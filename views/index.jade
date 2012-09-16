@@ -59,7 +59,8 @@ script
           numPosts++;
           $(".post").slideDown();
 
-          placePin(data.update[0], map, info_window);
+          var marker = createMarker(data.update[0], map, info_window);
+          marker.setMap(map);
         })
 
         socket.on('new', function(data){

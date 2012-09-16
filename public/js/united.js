@@ -134,14 +134,21 @@ function initialize(socket) {
     success: function(data) {
       var pins = data.results;
       $("#pincount").text(pins.length);
+      var markers = [];
+
       for(var i = 0; i < pins.length; i++){
         var pin = pins[i];
         var cookie = $.cookie("monster");
         if( cookie === pin._id ){
           map.panTo(new google.maps.LatLng(pin.lat, pin.lng));
         }
-        placePin(pin, map, info_window);
+        var marker = createMarker(pin, map, info_window);
+        markers.push(marker);
       }
+
+      var markerCluster = new MarkerClusterer(map, markers, {
+        maxZoom: 7
+      });
     }
 
   });
@@ -187,7 +194,7 @@ function initialize(socket) {
   return { map: map, info_window: info_window };
 }
 
-function placePin(pin, map, info_window){
+function createMarker(pin, map, info_window){
   pin.lat = +pin.lat;
   pin.lng = +pin.lng;
   var b1 = Math.random() / 18;
@@ -196,7 +203,6 @@ function placePin(pin, map, info_window){
   var r3 = Math.random() > 0.5 ? 1 : -1;
 
   var m = new google.maps.Marker({
-    map: map,
     animation: google.maps.Animation.DROP,
     title: pin.name,
     position: new google.maps.LatLng(pin.lat + (b1 * r2), pin.lng + (b2 * r3)),
@@ -209,6 +215,8 @@ function placePin(pin, map, info_window){
       info_window.open(map, m);
     };
   })(m));
+
+  return m;
 }
 
 function validate(event, socket){
