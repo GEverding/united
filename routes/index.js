@@ -56,6 +56,7 @@ var EggLoc = mongoose.model('EggLoc', EggLocationSchema);
 
 exports.pins = function(req, res){
   var formatter = new ArrayFormatter();
+  var gzipper   = zlib.createGzip();
 
   res.writeHead(200, {
     'content-type': 'application/json'
@@ -64,6 +65,7 @@ exports.pins = function(req, res){
   Pin.find({})
      .stream()
      .pipe(formatter)
+     .pipe(gzipper)
      .pipe(res);
 };
 
