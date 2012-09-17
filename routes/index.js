@@ -59,6 +59,7 @@ exports.pins = function(req, res){
   var gzipper   = zlib.createGzip();
 
   res.writeHead(200, {
+    'content-encoding': 'gzip',
     'content-type': 'application/json'
   });
 
